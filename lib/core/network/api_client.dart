@@ -83,7 +83,18 @@ class ApiException implements Exception {
   static String? _parseErrorMessage(dynamic data) {
     if (data == null) return null;
     if (data is Map) {
-      return data['message'] as String? ?? data['error'] as String?;
+      // message가 String이면 바로 반환
+      if (data['message'] is String) {
+        return data['message'];
+      }
+      // error가 Map이면 그 안의 message 반환
+      if (data['error'] is Map) {
+        return data['error']['message'] as String?;
+      }
+      // error가 String이면 그대로 반환
+      if (data['error'] is String) {
+        return data['error'];
+      }
     }
     return null;
   }

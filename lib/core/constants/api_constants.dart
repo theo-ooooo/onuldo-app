@@ -1,7 +1,10 @@
 class ApiConstants {
   ApiConstants._();
 
-  static const String baseUrl = 'http://localhost:8080';
+  // Android 에뮬레이터: 10.0.2.2 (호스트 PC)
+  // iOS 시뮬레이터/웹: localhost
+  // 실제 기기: 서버 IP 주소
+  static const String baseUrl = 'http://10.0.2.2:8080';
 
   // Auth endpoints
   static const String login = '/api/auth/login';
@@ -13,11 +16,11 @@ class ApiConstants {
   static String hobby(int id) => '/api/hobbies/$id';
 
   // Timer endpoints
-  static const String timerStart = '/api/timer/start';
-  static const String timerPause = '/api/timer/pause';
-  static const String timerResume = '/api/timer/resume';
-  static const String timerStop = '/api/timer/stop';
-  static const String timerCurrent = '/api/timer/current';
+  static const String timerStart = '/api/timers/start';
+  static const String timerPause = '/api/timers/pause';
+  static const String timerResume = '/api/timers/resume';
+  static const String timerStop = '/api/timers/stop';
+  static const String timerCurrent = '/api/timers/current';
 
   // Record endpoints
   static const String records = '/api/records';
