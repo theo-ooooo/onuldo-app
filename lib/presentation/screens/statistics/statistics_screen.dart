@@ -91,20 +91,20 @@ class _DailyStatisticsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final today = statistics.today;
+    final daily = statistics.daily;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: today.totalSeconds,
-            recordCount: today.recordCount,
+            totalSeconds: daily.totalDurationSeconds,
+            recordCount: daily.recordCount,
             label: '오늘',
           ),
           const SizedBox(height: 24),
-          if (today.hobbyBreakdown != null && today.hobbyBreakdown!.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: today.hobbyBreakdown!),
+          if (statistics.hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
         ],
       ),
     );
@@ -118,22 +118,20 @@ class _WeeklyStatisticsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final week = statistics.thisWeek;
+    final weekly = statistics.weekly;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: week.totalSeconds,
-            recordCount: week.recordCount,
+            totalSeconds: weekly.totalDurationSeconds,
+            recordCount: weekly.recordCount,
             label: '이번 주',
           ),
           const SizedBox(height: 24),
-          _WeeklyChartCard(dailyBreakdown: week.dailyBreakdown),
-          const SizedBox(height: 24),
-          if (statistics.hobbyBreakdown.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: statistics.hobbyBreakdown),
+          if (statistics.hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
         ],
       ),
     );
@@ -147,22 +145,20 @@ class _MonthlyStatisticsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final month = statistics.thisMonth;
+    final monthly = statistics.monthly;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: month.totalSeconds,
-            recordCount: month.recordCount,
-            label: '${month.month}월',
+            totalSeconds: monthly.totalDurationSeconds,
+            recordCount: monthly.recordCount,
+            label: '${monthly.month}월',
           ),
           const SizedBox(height: 24),
-          _OverviewCard(statistics: statistics),
-          const SizedBox(height: 24),
-          if (statistics.hobbyBreakdown.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: statistics.hobbyBreakdown),
+          if (statistics.hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
         ],
       ),
     );
@@ -223,147 +219,6 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _WeeklyChartCard extends StatelessWidget {
-  final List<DailyStatistics> dailyBreakdown;
-
-  const _WeeklyChartCard({required this.dailyBreakdown});
-
-  @override
-  Widget build(BuildContext context) {
-    final maxSeconds = dailyBreakdown.isEmpty
-        ? 1
-        : dailyBreakdown
-            .map((d) => d.totalSeconds)
-            .reduce((a, b) => a > b ? a : b);
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('일별 활동', style: AppTextStyles.h4),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: dailyBreakdown.map((day) {
-                final height = maxSeconds > 0
-                    ? (day.totalSeconds / maxSeconds) * 100
-                    : 0.0;
-
-                return Column(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: height.clamp(4, 100),
-                      decoration: BoxDecoration(
-                        color: day.totalSeconds > 0
-                            ? AppColors.primary
-                            : AppColors.surfaceVariant,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _getDayLabel(day.date),
-                      style: AppTextStyles.bodySmall,
-                    ),
-                  ],
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getDayLabel(String date) {
-    try {
-      final dateTime = DateTime.parse(date);
-      const days = ['월', '화', '수', '목', '금', '토', '일'];
-      return days[dateTime.weekday - 1];
-    } catch (e) {
-      return '';
-    }
-  }
-}
-
-class _OverviewCard extends StatelessWidget {
-  final UserStatistics statistics;
-
-  const _OverviewCard({required this.statistics});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('전체 현황', style: AppTextStyles.h4),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatItem(
-                    label: '총 기록',
-                    value: '${statistics.totalRecords}개',
-                    icon: Icons.event_note_outlined,
-                  ),
-                ),
-                Expanded(
-                  child: _StatItem(
-                    label: '총 시간',
-                    value: DurationFormatter.formatHumanReadable(
-                      Duration(seconds: statistics.totalSeconds),
-                    ),
-                    icon: Icons.timer_outlined,
-                  ),
-                ),
-                Expanded(
-                  child: _StatItem(
-                    label: '취미 개수',
-                    value: '${statistics.totalHobbies}개',
-                    icon: Icons.palette_outlined,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, color: AppColors.primary, size: 28),
-        const SizedBox(height: 8),
-        Text(value, style: AppTextStyles.labelLarge),
-        const SizedBox(height: 4),
-        Text(label, style: AppTextStyles.bodySmall),
-      ],
-    );
-  }
-}
-
 class _HobbyBreakdownCard extends StatelessWidget {
   final List<HobbyStatistics> hobbies;
 
@@ -403,7 +258,7 @@ class _HobbyBreakdownCard extends StatelessWidget {
                       const SizedBox(width: 16),
                       Text(
                         DurationFormatter.formatHumanReadable(
-                          Duration(seconds: hobby.totalSeconds),
+                          Duration(seconds: hobby.totalDurationSeconds),
                         ),
                         style: AppTextStyles.labelMedium,
                       ),
