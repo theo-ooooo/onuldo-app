@@ -9,12 +9,14 @@ import '../../providers/providers.dart';
 import '../../widgets/widgets.dart';
 
 class CreateRecordScreen extends ConsumerStatefulWidget {
+  final int? timerId;
   final int? hobbyId;
   final String? hobbyName;
   final int? durationSeconds;
 
   const CreateRecordScreen({
     super.key,
+    this.timerId,
     this.hobbyId,
     this.hobbyName,
     this.durationSeconds,
@@ -35,7 +37,7 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
   }
 
   Future<void> _saveRecord() async {
-    if (widget.hobbyId == null || widget.durationSeconds == null) {
+    if (widget.timerId == null || widget.hobbyId == null || widget.durationSeconds == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('기록 정보가 올바르지 않습니다')),
       );
@@ -44,6 +46,7 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
 
     final record = await ref.read(recordProvider.notifier).createRecord(
           CreateRecordRequest(
+            timerId: widget.timerId!,
             hobbyId: widget.hobbyId!,
             durationSeconds: widget.durationSeconds!,
             memo: _memoController.text.trim().isEmpty

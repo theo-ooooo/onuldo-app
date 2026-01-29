@@ -107,6 +107,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
       context.push(
         AppRoutes.createRecord,
         extra: {
+          'timerId': result.id,
           'hobbyId': result.hobbyId,
           'hobbyName': selectedHobby?.name ?? '',
           'durationSeconds': result.durationSeconds,

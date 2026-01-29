@@ -101,6 +101,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
           return CreateRecordScreen(
+            timerId: extra?['timerId'] as int?,
             hobbyId: extra?['hobbyId'] as int?,
             hobbyName: extra?['hobbyName'] as String?,
             durationSeconds: extra?['durationSeconds'] as int?,

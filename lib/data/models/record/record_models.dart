@@ -36,11 +36,11 @@ class RecordResponse with _$RecordResponse {
 @freezed
 class CreateRecordRequest with _$CreateRecordRequest {
   const factory CreateRecordRequest({
+    required int timerId,
     required int hobbyId,
     required int durationSeconds,
     String? memo,
     @Default(Visibility.public) Visibility visibility,
-    DateTime? recordedAt,
   }) = _CreateRecordRequest;
 
   factory CreateRecordRequest.fromJson(Map<String, dynamic> json) =>
