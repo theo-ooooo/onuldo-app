@@ -19,7 +19,10 @@ class LoginResult with _$LoginResult {
   const factory LoginResult({
     required String accessToken,
     required String refreshToken,
-    required UserInfo user,
+    required int userId,
+    required String email,
+    required String nickname,
+    String? tokenType,
   }) = _LoginResult;
 
   factory LoginResult.fromJson(Map<String, dynamic> json) =>

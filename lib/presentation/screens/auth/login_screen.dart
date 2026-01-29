@@ -35,7 +35,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           _passwordController.text,
         );
 
-    if (!success && mounted) {
+    if (!mounted) return;
+
+    if (success) {
+      context.go(AppRoutes.timer);
+    } else {
       final error = ref.read(authProvider).error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(

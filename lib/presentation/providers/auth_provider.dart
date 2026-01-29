@@ -66,7 +66,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       state = state.copyWith(
         status: AuthStatus.authenticated,
-        user: result.user,
+        user: UserInfo(
+          id: result.userId,
+          email: result.email,
+          nickname: result.nickname,
+        ),
       );
       return true;
     } on ApiException catch (e) {
