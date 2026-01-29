@@ -117,9 +117,9 @@ class AppTextStyles {
   // Timer display
   static const timer = TextStyle(
     fontSize: 64,
-    fontWeight: FontWeight.w300,
-    fontFamily: 'monospace',
-    letterSpacing: 2,
+    fontWeight: FontWeight.w200,
+    letterSpacing: 4,
+    fontFeatures: [FontFeature.tabularFigures()],
     color: AppColors.textPrimary,
   );
 }

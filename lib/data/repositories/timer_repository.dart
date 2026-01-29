@@ -80,13 +80,13 @@ class TimerRepository {
     }
   }
 
-  Future<TimerStopResult> stopTimer() async {
+  Future<TimerResponse> stopTimer() async {
     try {
       final response = await _dio.post(ApiConstants.timerStop);
 
-      final apiResponse = ApiResponse<TimerStopResult>.fromJson(
+      final apiResponse = ApiResponse<TimerResponse>.fromJson(
         response.data,
-        (json) => TimerStopResult.fromJson(json as Map<String, dynamic>),
+        (json) => TimerResponse.fromJson(json as Map<String, dynamic>),
       );
 
       if (apiResponse.success && apiResponse.data != null) {

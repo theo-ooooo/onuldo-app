@@ -15,7 +15,7 @@ enum LocalTimerStatus {
 class TimerState {
   final LocalTimerStatus status;
   final TimerResponse? serverTimer;
-  final TimerStopResult? stopResult;
+  final TimerResponse? stopResult;
   final int elapsedSeconds;
   final bool isLoading;
   final String? error;
@@ -32,7 +32,7 @@ class TimerState {
   TimerState copyWith({
     LocalTimerStatus? status,
     TimerResponse? serverTimer,
-    TimerStopResult? stopResult,
+    TimerResponse? stopResult,
     int? elapsedSeconds,
     bool? isLoading,
     String? error,
@@ -163,7 +163,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
     }
   }
 
-  Future<TimerStopResult?> stopTimer() async {
+  Future<TimerResponse?> stopTimer() async {
     state = state.copyWith(isLoading: true, error: null);
 
     try {

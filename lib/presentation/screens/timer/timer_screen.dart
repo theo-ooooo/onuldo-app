@@ -101,14 +101,15 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   }
 
   Future<void> _stopTimer() async {
+    final selectedHobby = ref.read(hobbyProvider).selectedHobby;
     final result = await ref.read(timerProvider.notifier).stopTimer();
     if (result != null && mounted) {
       context.push(
         AppRoutes.createRecord,
         extra: {
           'hobbyId': result.hobbyId,
-          'hobbyName': result.hobbyName,
-          'durationSeconds': result.totalSeconds,
+          'hobbyName': selectedHobby?.name ?? '',
+          'durationSeconds': result.durationSeconds,
         },
       );
     }
