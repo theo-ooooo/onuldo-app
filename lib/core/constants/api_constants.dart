@@ -16,7 +16,7 @@ class ApiConstants {
   static String hobby(int id) => '/api/hobbies/$id';
 
   // Timer endpoints
-  static const String timerStart = '/api/timers/start';
+  static const String timerStart = '/api/timers';
   static const String timerPause = '/api/timers/pause';
   static const String timerResume = '/api/timers/resume';
   static const String timerStop = '/api/timers/stop';

@@ -64,7 +64,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       if (timer != null) {
         state = state.copyWith(
           serverTimer: timer,
-          elapsedSeconds: timer.elapsedSeconds,
+          elapsedSeconds: timer.durationSeconds,
           status: timer.status == TimerStatus.running
               ? LocalTimerStatus.running
               : timer.status == TimerStatus.paused
@@ -101,7 +101,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       state = state.copyWith(
         serverTimer: timer,
         status: LocalTimerStatus.running,
-        elapsedSeconds: timer.elapsedSeconds,
+        elapsedSeconds: timer.durationSeconds,
         isLoading: false,
       );
 
@@ -126,7 +126,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       state = state.copyWith(
         serverTimer: timer,
         status: LocalTimerStatus.paused,
-        elapsedSeconds: timer.elapsedSeconds,
+        elapsedSeconds: timer.durationSeconds,
         isLoading: false,
       );
       return true;
@@ -148,7 +148,7 @@ class TimerNotifier extends StateNotifier<TimerState> {
       state = state.copyWith(
         serverTimer: timer,
         status: LocalTimerStatus.running,
-        elapsedSeconds: timer.elapsedSeconds,
+        elapsedSeconds: timer.durationSeconds,
         isLoading: false,
       );
 

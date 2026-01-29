@@ -182,19 +182,16 @@ class _SummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border, width: 0.5),
       ),
       child: Column(
         children: [
           Text(
             label,
             style: AppTextStyles.labelLarge.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -202,15 +199,13 @@ class _SummaryCard extends StatelessWidget {
             DurationFormatter.formatHumanReadable(
               Duration(seconds: totalSeconds),
             ),
-            style: AppTextStyles.h1.copyWith(
-              color: Colors.white,
-            ),
+            style: AppTextStyles.h1,
           ),
           const SizedBox(height: 8),
           Text(
             '$recordCount개의 기록',
             style: AppTextStyles.bodyMedium.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: AppColors.textSecondary,
             ),
           ),
         ],

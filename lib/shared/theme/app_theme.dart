@@ -3,40 +3,39 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  // Primary colors
-  static const primary = Color(0xFF6366F1);
-  static const primaryLight = Color(0xFF818CF8);
-  static const primaryDark = Color(0xFF4F46E5);
+  // Primary colors - Neutral gray accent
+  static const primary = Color(0xFFE5E5E5);
+  static const primaryLight = Color(0xFFF5F5F5);
+  static const primaryDark = Color(0xFFD4D4D4);
 
-  // Secondary colors
-  static const secondary = Color(0xFF10B981);
-  static const secondaryLight = Color(0xFF34D399);
-  static const secondaryDark = Color(0xFF059669);
+  // Accent color - subtle warm white
+  static const accent = Color(0xFFFAFAFA);
 
-  // Neutral colors
-  static const background = Color(0xFFF8FAFC);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceVariant = Color(0xFFF1F5F9);
+  // Background colors - Dark
+  static const background = Color(0xFF0A0A0A);
+  static const surface = Color(0xFF171717);
+  static const surfaceVariant = Color(0xFF262626);
+  static const surfaceElevated = Color(0xFF1F1F1F);
 
   // Text colors
-  static const textPrimary = Color(0xFF1E293B);
-  static const textSecondary = Color(0xFF64748B);
-  static const textTertiary = Color(0xFF94A3B8);
+  static const textPrimary = Color(0xFFFAFAFA);
+  static const textSecondary = Color(0xFFA3A3A3);
+  static const textTertiary = Color(0xFF737373);
 
   // Status colors
   static const error = Color(0xFFEF4444);
   static const success = Color(0xFF22C55E);
-  static const warning = Color(0xFFF59E0B);
-  static const info = Color(0xFF3B82F6);
+  static const warning = Color(0xFFFBBF24);
+  static const info = Color(0xFF60A5FA);
 
   // Border colors
-  static const border = Color(0xFFE2E8F0);
-  static const divider = Color(0xFFF1F5F9);
+  static const border = Color(0xFF404040);
+  static const divider = Color(0xFF262626);
 
   // Timer colors
-  static const timerRunning = Color(0xFF10B981);
-  static const timerPaused = Color(0xFFF59E0B);
-  static const timerStopped = Color(0xFF64748B);
+  static const timerRunning = Color(0xFF4ADE80);
+  static const timerPaused = Color(0xFFFBBF24);
+  static const timerStopped = Color(0xFF737373);
 }
 
 class AppTextStyles {
@@ -128,15 +127,15 @@ class AppTextStyles {
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get lightTheme {
+  static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
+      brightness: Brightness.dark,
+      colorScheme: const ColorScheme.dark(
         primary: AppColors.primary,
-        onPrimary: Colors.white,
-        secondary: AppColors.secondary,
-        onSecondary: Colors.white,
+        onPrimary: AppColors.background,
+        secondary: AppColors.accent,
+        onSecondary: AppColors.background,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
         error: AppColors.error,
@@ -144,23 +143,24 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.background,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         centerTitle: true,
         titleTextStyle: AppTextStyles.h4,
+        surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
+        selectedItemColor: AppColors.textPrimary,
         unselectedItemColor: AppColors.textTertiary,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.background,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -171,18 +171,18 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.textPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          side: const BorderSide(color: AppColors.primary),
+          side: const BorderSide(color: AppColors.border),
           textStyle: AppTextStyles.button,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primary,
+          foregroundColor: AppColors.textPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           textStyle: AppTextStyles.button,
         ),
@@ -200,7 +200,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -216,7 +216,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: AppColors.border, width: 0.5),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -225,12 +225,31 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surfaceVariant,
-        selectedColor: AppColors.primaryLight,
+        selectedColor: AppColors.primary,
         labelStyle: AppTextStyles.labelMedium,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        side: BorderSide.none,
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: AppColors.textPrimary,
+        unselectedLabelColor: AppColors.textTertiary,
+        indicatorColor: AppColors.textPrimary,
+        dividerColor: Colors.transparent,
+      ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: AppColors.primary,
+        linearTrackColor: AppColors.surfaceVariant,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.surfaceElevated,
+        contentTextStyle: AppTextStyles.bodyMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

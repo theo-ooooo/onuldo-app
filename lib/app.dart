@@ -14,7 +14,7 @@ class OnuldoApp extends ConsumerWidget {
     return MaterialApp.router(
       title: '오늘도',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
       routerConfig: router,
     );
   }

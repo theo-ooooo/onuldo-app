@@ -71,21 +71,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: AppColors.surface,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.border, width: 0.5),
                     ),
                     child: const Icon(
                       Icons.timer_outlined,
                       size: 48,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     '오늘도',
-                    style: AppTextStyles.h1.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTextStyles.h1,
                   ),
                   const SizedBox(height: 8),
                   Text(

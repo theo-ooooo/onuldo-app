@@ -98,30 +98,22 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.primaryDark,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.border, width: 0.5),
               ),
               child: Column(
                 children: [
                   Text(
                     widget.hobbyName ?? '취미',
                     style: AppTextStyles.h3.copyWith(
-                      color: Colors.white,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     DurationFormatter.formatSeconds(widget.durationSeconds ?? 0),
-                    style: AppTextStyles.displayLarge.copyWith(
-                      color: Colors.white,
-                    ),
+                    style: AppTextStyles.displayLarge,
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -129,7 +121,7 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                       Duration(seconds: widget.durationSeconds ?? 0),
                     ),
                     style: AppTextStyles.bodyLarge.copyWith(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],

@@ -17,13 +17,10 @@ class TimerResponse with _$TimerResponse {
   const factory TimerResponse({
     required int id,
     required int hobbyId,
-    required String hobbyName,
     required TimerStatus status,
-    required DateTime startedAt,
-    DateTime? pausedAt,
-    DateTime? stoppedAt,
-    required int elapsedSeconds,
-    required int pausedSeconds,
+    required DateTime startTime,
+    DateTime? endTime,
+    @Default(0) int durationSeconds,
   }) = _TimerResponse;
 
   factory TimerResponse.fromJson(Map<String, dynamic> json) =>
