@@ -14,7 +14,7 @@ class FeedRepository {
 
   FeedRepository(this._dio);
 
-  Future<PagedResponse<FeedItemResponse>> getFeed({
+  Future<List<FeedItemResponse>> getFeed({
     int page = 0,
     int size = 20,
     SortType sort = SortType.latest,
@@ -29,17 +29,15 @@ class FeedRepository {
         },
       );
 
-      final apiResponse = ApiResponse<PagedResponse<FeedItemResponse>>.fromJson(
+      final apiResponse = ApiResponse<List<dynamic>>.fromJson(
         response.data,
-        (json) => PagedResponse<FeedItemResponse>.fromJson(
-          json as Map<String, dynamic>,
-          (itemJson) =>
-              FeedItemResponse.fromJson(itemJson as Map<String, dynamic>),
-        ),
+        (json) => json as List<dynamic>,
       );
 
       if (apiResponse.success && apiResponse.data != null) {
-        return apiResponse.data!;
+        return apiResponse.data!
+            .map((item) => FeedItemResponse.fromJson(item as Map<String, dynamic>))
+            .toList();
       }
 
       throw ApiException(
@@ -50,7 +48,7 @@ class FeedRepository {
     }
   }
 
-  Future<PagedResponse<FeedItemResponse>> getFollowingFeed({
+  Future<List<FeedItemResponse>> getFollowingFeed({
     int page = 0,
     int size = 20,
     SortType sort = SortType.latest,
@@ -65,17 +63,15 @@ class FeedRepository {
         },
       );
 
-      final apiResponse = ApiResponse<PagedResponse<FeedItemResponse>>.fromJson(
+      final apiResponse = ApiResponse<List<dynamic>>.fromJson(
         response.data,
-        (json) => PagedResponse<FeedItemResponse>.fromJson(
-          json as Map<String, dynamic>,
-          (itemJson) =>
-              FeedItemResponse.fromJson(itemJson as Map<String, dynamic>),
-        ),
+        (json) => json as List<dynamic>,
       );
 
       if (apiResponse.success && apiResponse.data != null) {
-        return apiResponse.data!;
+        return apiResponse.data!
+            .map((item) => FeedItemResponse.fromJson(item as Map<String, dynamic>))
+            .toList();
       }
 
       throw ApiException(

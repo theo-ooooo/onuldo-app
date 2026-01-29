@@ -66,26 +66,29 @@ class FeedNotifier extends StateNotifier<FeedState> {
     );
 
     try {
-      final response = state.feedType == FeedType.all
+      const pageSize = 20;
+      final items = state.feedType == FeedType.all
           ? await _feedRepository.getFeed(
               page: page,
+              size: pageSize,
               sort: state.sortType,
             )
           : await _feedRepository.getFollowingFeed(
               page: page,
+              size: pageSize,
               sort: state.sortType,
             );
 
       final newItems = refresh || page == 0
-          ? response.content
-          : [...state.items, ...response.content];
+          ? items
+          : [...state.items, ...items];
 
       state = state.copyWith(
         items: newItems,
         isLoading: false,
         isLoadingMore: false,
         currentPage: page + 1,
-        hasMore: !response.last,
+        hasMore: items.length >= pageSize,
       );
     } on ApiException catch (e) {
       state = state.copyWith(

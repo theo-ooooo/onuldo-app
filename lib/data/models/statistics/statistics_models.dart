@@ -6,13 +6,10 @@ part 'statistics_models.g.dart';
 @freezed
 class UserStatistics with _$UserStatistics {
   const factory UserStatistics({
-    required int totalRecords,
-    required int totalSeconds,
-    required int totalHobbies,
-    required DailyStatistics today,
-    required WeeklyStatistics thisWeek,
-    required MonthlyStatistics thisMonth,
-    required List<HobbyStatistics> hobbyBreakdown,
+    required DailyStatistics daily,
+    required WeeklyStatistics weekly,
+    required MonthlyStatistics monthly,
+    @Default([]) List<HobbyStatistics> hobbyStats,
   }) = _UserStatistics;
 
   factory UserStatistics.fromJson(Map<String, dynamic> json) =>
@@ -23,9 +20,8 @@ class UserStatistics with _$UserStatistics {
 class DailyStatistics with _$DailyStatistics {
   const factory DailyStatistics({
     required String date,
-    required int totalSeconds,
-    required int recordCount,
-    List<HobbyStatistics>? hobbyBreakdown,
+    @Default(0) int recordCount,
+    @Default(0) int totalDurationSeconds,
   }) = _DailyStatistics;
 
   factory DailyStatistics.fromJson(Map<String, dynamic> json) =>
@@ -37,9 +33,8 @@ class WeeklyStatistics with _$WeeklyStatistics {
   const factory WeeklyStatistics({
     required String startDate,
     required String endDate,
-    required int totalSeconds,
-    required int recordCount,
-    required List<DailyStatistics> dailyBreakdown,
+    @Default(0) int recordCount,
+    @Default(0) int totalDurationSeconds,
   }) = _WeeklyStatistics;
 
   factory WeeklyStatistics.fromJson(Map<String, dynamic> json) =>
@@ -49,11 +44,9 @@ class WeeklyStatistics with _$WeeklyStatistics {
 @freezed
 class MonthlyStatistics with _$MonthlyStatistics {
   const factory MonthlyStatistics({
-    required int year,
     required int month,
-    required int totalSeconds,
-    required int recordCount,
-    required List<DailyStatistics> dailyBreakdown,
+    @Default(0) int recordCount,
+    @Default(0) int totalDurationSeconds,
   }) = _MonthlyStatistics;
 
   factory MonthlyStatistics.fromJson(Map<String, dynamic> json) =>
@@ -66,9 +59,9 @@ class HobbyStatistics with _$HobbyStatistics {
     required int hobbyId,
     required String hobbyName,
     String? hobbyColorCode,
-    required int totalSeconds,
-    required int recordCount,
-    required double percentage,
+    @Default(0) int totalDurationSeconds,
+    @Default(0) int recordCount,
+    @Default(0.0) double percentage,
   }) = _HobbyStatistics;
 
   factory HobbyStatistics.fromJson(Map<String, dynamic> json) =>
