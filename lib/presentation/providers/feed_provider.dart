@@ -140,7 +140,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
 
       // Update local state
       final updatedItems = state.items.map((item) {
-        if (item.id == recordId) {
+        if (item.recordId == recordId) {
           return item.copyWith(
             myReaction: emojiType,
             reactionCount: item.reactionCount + 1,
@@ -161,7 +161,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
 
       // Update local state
       final updatedItems = state.items.map((item) {
-        if (item.id == recordId) {
+        if (item.recordId == recordId) {
           return item.copyWith(
             myReaction: null,
             reactionCount: item.reactionCount > 0 ? item.reactionCount - 1 : 0,

@@ -23,21 +23,21 @@ enum SortType {
 @freezed
 class FeedItemResponse with _$FeedItemResponse {
   const factory FeedItemResponse({
-    required int id,
+    required int recordId,
     required int userId,
     required String userNickname,
     String? userProfileImageUrl,
     required int hobbyId,
     required String hobbyName,
-    String? hobbyColorCode,
     required int durationSeconds,
     String? memo,
     required Visibility visibility,
-    required DateTime recordedAt,
-    required int reactionCount,
-    List<ReactionCountResponse>? reactionCounts,
+    required String activityDate,
+    @Default([]) List<String> tags,
+    @Default(0) int reactionCount,
+    @Default(0) int commentCount,
+    DateTime? createdAt,
     EmojiType? myReaction,
-    required bool isFollowing,
   }) = _FeedItemResponse;
 
   factory FeedItemResponse.fromJson(Map<String, dynamic> json) =>

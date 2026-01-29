@@ -144,9 +144,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen>
             item: item,
             onReaction: (emoji) {
               if (item.myReaction == emoji) {
-                ref.read(feedProvider.notifier).removeReaction(item.id);
+                ref.read(feedProvider.notifier).removeReaction(item.recordId);
               } else {
-                ref.read(feedProvider.notifier).addReaction(item.id, emoji);
+                ref.read(feedProvider.notifier).addReaction(item.recordId, emoji);
               }
             },
           );
@@ -202,7 +202,9 @@ class _FeedCard extends StatelessWidget {
                         style: AppTextStyles.labelLarge,
                       ),
                       Text(
-                        _formatTime(item.recordedAt),
+                        item.createdAt != null
+                            ? _formatTime(item.createdAt!)
+                            : item.activityDate,
                         style: AppTextStyles.bodySmall,
                       ),
                     ],
