@@ -17,15 +17,13 @@ class RecordResponse with _$RecordResponse {
   const factory RecordResponse({
     required int id,
     required int userId,
-    required String userNickname,
-    String? userProfileImageUrl,
     required int hobbyId,
-    required String hobbyName,
-    String? hobbyColorCode,
+    int? timerId,
     required int durationSeconds,
     String? memo,
     required Visibility visibility,
-    required DateTime recordedAt,
+    required String activityDate,
+    @Default([]) List<String> tags,
     DateTime? createdAt,
   }) = _RecordResponse;
 
