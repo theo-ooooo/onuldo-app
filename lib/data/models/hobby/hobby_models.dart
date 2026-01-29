@@ -10,10 +10,7 @@ class HobbyResponse with _$HobbyResponse {
     required String name,
     String? description,
     String? colorCode,
-    String? iconName,
-    required int userId,
-    DateTime? createdAt,
-    DateTime? updatedAt,
+    String? iconUrl,
   }) = _HobbyResponse;
 
   factory HobbyResponse.fromJson(Map<String, dynamic> json) =>
