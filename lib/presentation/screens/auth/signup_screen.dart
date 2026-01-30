@@ -70,12 +70,21 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   const SizedBox(height: 20),
 
                   // Back button
-                  IconButton(
-                    onPressed: () => context.go(AppRoutes.login),
-                    icon: const Icon(Icons.arrow_back),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.surface,
-                      padding: const EdgeInsets.all(12),
+                  GestureDetector(
+                    onTap: () => context.go(AppRoutes.login),
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textPrimary,
+                        size: 20,
+                      ),
                     ),
                   ),
 
@@ -85,7 +94,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   Text(
                     '회원가입',
                     style: AppTextStyles.h1.copyWith(
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -236,8 +245,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _signUp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
-                        foregroundColor: AppColors.background,
+                        backgroundColor: const Color(0xFF18181B),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -246,6 +255,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         '가입하기',
                         style: AppTextStyles.button.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),

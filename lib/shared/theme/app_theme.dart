@@ -4,37 +4,37 @@ class AppColors {
   AppColors._();
 
   // Primary colors - Neutral gray accent
-  static const primary = Color(0xFFE5E5E5);
-  static const primaryLight = Color(0xFFF5F5F5);
-  static const primaryDark = Color(0xFFD4D4D4);
+  static const primary = Color(0xFF262626);
+  static const primaryLight = Color(0xFF404040);
+  static const primaryDark = Color(0xFF171717);
 
-  // Accent color - subtle warm white
-  static const accent = Color(0xFFFAFAFA);
+  // Accent color
+  static const accent = Color(0xFF525252);
 
-  // Background colors - Dark
-  static const background = Color(0xFF0A0A0A);
-  static const surface = Color(0xFF171717);
-  static const surfaceVariant = Color(0xFF262626);
-  static const surfaceElevated = Color(0xFF1F1F1F);
+  // Background colors - Light Gray
+  static const background = Color(0xFFF5F5F5);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceVariant = Color(0xFFE5E5E5);
+  static const surfaceElevated = Color(0xFFFFFFFF);
 
   // Text colors
-  static const textPrimary = Color(0xFFFAFAFA);
-  static const textSecondary = Color(0xFFA3A3A3);
+  static const textPrimary = Color(0xFF171717);
+  static const textSecondary = Color(0xFF525252);
   static const textTertiary = Color(0xFF737373);
 
   // Status colors
-  static const error = Color(0xFFEF4444);
-  static const success = Color(0xFF22C55E);
-  static const warning = Color(0xFFFBBF24);
-  static const info = Color(0xFF60A5FA);
+  static const error = Color(0xFFDC2626);
+  static const success = Color(0xFF16A34A);
+  static const warning = Color(0xFFD97706);
+  static const info = Color(0xFF2563EB);
 
   // Border colors
-  static const border = Color(0xFF404040);
-  static const divider = Color(0xFF262626);
+  static const border = Color(0xFFE5E5E5);
+  static const divider = Color(0xFFE5E5E5);
 
   // Timer colors
-  static const timerRunning = Color(0xFF4ADE80);
-  static const timerPaused = Color(0xFFFBBF24);
+  static const timerRunning = Color(0xFF16A34A);
+  static const timerPaused = Color(0xFFD97706);
   static const timerStopped = Color(0xFF737373);
 }
 
@@ -107,6 +107,12 @@ class AppTextStyles {
     color: AppColors.textSecondary,
   );
 
+  static const labelSmall = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w500,
+    color: AppColors.textTertiary,
+  );
+
   // Button
   static const button = TextStyle(
     fontSize: 16,
@@ -127,15 +133,15 @@ class AppTextStyles {
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: const ColorScheme.dark(
+      brightness: Brightness.light,
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        onPrimary: AppColors.background,
+        onPrimary: Colors.white,
         secondary: AppColors.accent,
-        onSecondary: AppColors.background,
+        onSecondary: Colors.white,
         surface: AppColors.surface,
         onSurface: AppColors.textPrimary,
         error: AppColors.error,
@@ -160,7 +166,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.background,
+          foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -189,18 +195,18 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceVariant,
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -216,7 +222,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.border, width: 0.5),
+          side: const BorderSide(color: AppColors.border, width: 1),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -244,8 +250,8 @@ class AppTheme {
         linearTrackColor: AppColors.surfaceVariant,
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surfaceElevated,
-        contentTextStyle: AppTextStyles.bodyMedium,
+        backgroundColor: AppColors.primary,
+        contentTextStyle: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

@@ -69,64 +69,45 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo
+                    // Logo Icon
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 30,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                        color: const Color(0xFF18181B),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Center(
-                        child: ShaderMask(
-                          shaderCallback: (bounds) => LinearGradient(
-                            colors: [
-                              AppColors.textPrimary,
-                              AppColors.textSecondary,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ).createShader(bounds),
-                          child: const Text(
-                            'O',
-                            style: TextStyle(
-                              fontSize: 64,
-                              fontWeight: FontWeight.w200,
-                              color: Colors.white,
-                              letterSpacing: -2,
-                            ),
+                      child: const Center(
+                        child: Text(
+                          '오',
+                          style: TextStyle(
+                            fontSize: 56,
+                            fontWeight: FontWeight.w300,
+                            color: Color(0xFFFAFAFA),
+                            height: 1,
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 32),
-                    // App name
+                    // Wordmark
                     Text(
                       '오늘도',
-                      style: AppTextStyles.h1.copyWith(
-                        fontSize: 32,
-                        letterSpacing: 8,
-                        fontWeight: FontWeight.w300,
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textPrimary,
+                        letterSpacing: 4,
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'RECORD YOUR MOMENT',
-                      style: AppTextStyles.bodySmall.copyWith(
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w500,
                         color: AppColors.textTertiary,
-                        letterSpacing: 4,
-                        fontSize: 10,
+                        letterSpacing: 3,
                       ),
                     ),
                   ],

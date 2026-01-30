@@ -68,30 +68,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 80),
 
                   // Logo
-                  Center(
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color: AppColors.border,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'O',
-                          style: TextStyle(
-                            fontSize: 52,
-                            fontWeight: FontWeight.w200,
-                            color: AppColors.textPrimary,
-                            letterSpacing: -2,
-                          ),
-                        ),
-                      ),
-                    ),
+                  const Center(
+                    child: AppLogoIcon(size: 100),
                   ),
                   const SizedBox(height: 24),
 
@@ -99,9 +77,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Center(
                     child: Text(
                       '오늘도',
-                      style: AppTextStyles.h1.copyWith(
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textPrimary,
                         letterSpacing: 6,
-                        fontWeight: FontWeight.w300,
                       ),
                     ),
                   ),
@@ -112,7 +92,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     '반갑습니다',
                     style: AppTextStyles.h2.copyWith(
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -208,8 +188,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
-                        foregroundColor: AppColors.background,
+                        backgroundColor: const Color(0xFF18181B),
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -218,6 +198,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         '로그인',
                         style: AppTextStyles.button.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),
