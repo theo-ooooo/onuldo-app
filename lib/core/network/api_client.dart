@@ -231,6 +231,28 @@ class ApiClient {
     }
   }
 
+  /// PUT 요청 (응답 데이터 없음)
+  Future<void> putVoid(
+    String path, {
+    dynamic data,
+  }) async {
+    try {
+      final response = await _dio.put(path, data: data);
+      final apiResponse = ApiResponse<void>.fromJson(
+        response.data,
+        (_) {},
+      );
+
+      if (!apiResponse.success) {
+        throw ApiException(
+          message: apiResponse.message ?? '요청에 실패했습니다.',
+        );
+      }
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// DELETE 요청 (응답 데이터 없음)
   Future<void> deleteVoid(String path) async {
     try {

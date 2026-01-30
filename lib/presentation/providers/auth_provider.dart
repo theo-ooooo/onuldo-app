@@ -41,8 +41,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final AuthRepository _authRepository;
   final FlutterSecureStorage _storage;
 
-  AuthNotifier(this._authRepository, this._storage)
-      : super(const AuthState());
+  AuthNotifier(this._authRepository, this._storage) : super(const AuthState());
 
   Future<void> checkAuthStatus() async {
     state = state.copyWith(status: AuthStatus.loading);
@@ -72,6 +71,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           nickname: result.nickname,
         ),
       );
+
       return true;
     } on ApiException catch (e) {
       state = state.copyWith(

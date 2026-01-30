@@ -36,4 +36,12 @@ class UserRepository {
       fromJson: UserResponse.fromJson,
     );
   }
+
+  /// FCM 토큰 업데이트
+  Future<void> updateFcmToken(String fcmToken) async {
+    return _apiClient.putVoid(
+      '/api/users/me/fcm-token',
+      data: {'fcmToken': fcmToken},
+    );
+  }
 }
