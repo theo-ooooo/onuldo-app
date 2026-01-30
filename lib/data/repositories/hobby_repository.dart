@@ -112,7 +112,7 @@ class HobbyRepository {
 
       final apiResponse = ApiResponse<void>.fromJson(
         response.data,
-        (_) => null,
+        (_) {},
       );
 
       if (!apiResponse.success) {

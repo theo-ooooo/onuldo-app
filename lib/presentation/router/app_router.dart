@@ -12,6 +12,8 @@ import '../screens/feed/feed_screen.dart';
 import '../screens/statistics/statistics_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/record/create_record_screen.dart';
+import '../screens/user/user_search_screen.dart';
+import '../screens/user/user_profile_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -108,6 +110,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      GoRoute(
+        path: '/user-search',
+        builder: (context, state) => const UserSearchScreen(),
+      ),
+      GoRoute(
+        path: '/user/:userId',
+        builder: (context, state) {
+          final userId = int.parse(state.pathParameters['userId']!);
+          return UserProfileScreen(userId: userId);
+        },
+      ),
     ],
   );
 });
@@ -123,4 +136,6 @@ class AppRoutes {
   static const statistics = '/statistics';
   static const profile = '/profile';
   static const createRecord = '/create-record';
+  static const userSearch = '/user-search';
+  static const userProfile = '/user';
 }

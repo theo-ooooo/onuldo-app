@@ -62,9 +62,9 @@ class FollowNotifier extends StateNotifier<FollowState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _followRepository.getFollowers(userId);
+      final followers = await _followRepository.getFollowers(userId);
       state = state.copyWith(
-        followers: response.content,
+        followers: followers,
         isLoading: false,
       );
     } on ApiException catch (e) {
@@ -79,9 +79,9 @@ class FollowNotifier extends StateNotifier<FollowState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final response = await _followRepository.getFollowing(userId);
+      final following = await _followRepository.getFollowing(userId);
       state = state.copyWith(
-        following: response.content,
+        following: following,
         isLoading: false,
       );
     } on ApiException catch (e) {

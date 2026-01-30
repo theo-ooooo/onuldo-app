@@ -1,10 +1,32 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 class ApiConstants {
   ApiConstants._();
 
-  // Android 에뮬레이터: 10.0.2.2 (호스트 PC)
-  // iOS 시뮬레이터/웹: localhost
-  // 실제 기기: 서버 IP 주소
-  static const String baseUrl = 'http://10.0.2.2:8080';
+  static const int _port = 8080;
+
+  /// 플랫폼별 baseUrl 반환
+  /// - Android 에뮬레이터: 10.0.2.2 (호스트 PC 접근)
+  /// - iOS 시뮬레이터: localhost
+  /// - Web: localhost
+  /// - 실제 기기: 서버 IP 주소 설정 필요
+  static String get baseUrl {
+    if (kIsWeb) {
+      return 'http://localhost:$_port';
+    }
+
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:$_port';
+    }
+
+    if (Platform.isIOS) {
+      return 'http://localhost:$_port';
+    }
+
+    // 기타 플랫폼 (macOS, Windows, Linux)
+    return 'http://localhost:$_port';
+  }
 
   // Auth endpoints
   static const String login = '/api/auth/login';

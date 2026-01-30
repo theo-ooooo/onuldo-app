@@ -6,7 +6,7 @@ part 'follow_models.g.dart';
 @freezed
 class FollowUserResponse with _$FollowUserResponse {
   const factory FollowUserResponse({
-    required int id,
+    required int userId,
     required String nickname,
     String? profileImageUrl,
     required bool isFollowing,

@@ -24,11 +24,11 @@ class DurationFormatter {
     final minutes = duration.inMinutes.remainder(60);
 
     if (hours > 0 && minutes > 0) {
-      return '${hours}시간 ${minutes}분';
+      return '$hours시간 $minutes분';
     } else if (hours > 0) {
-      return '${hours}시간';
+      return '$hours시간';
     } else if (minutes > 0) {
-      return '${minutes}분';
+      return '$minutes분';
     } else {
       return '${duration.inSeconds}초';
     }

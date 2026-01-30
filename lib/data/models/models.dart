@@ -19,6 +19,9 @@ export 'feed/feed_models.dart';
 // Follow
 export 'follow/follow_models.dart';
 
+// User
+export 'user/user_models.dart';
+
 // Reaction
 export 'reaction/reaction_models.dart';
 
