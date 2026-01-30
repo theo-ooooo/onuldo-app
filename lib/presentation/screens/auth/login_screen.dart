@@ -59,50 +59,89 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         isLoading: isLoading,
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 80),
+
                   // Logo
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.border, width: 0.5),
-                    ),
-                    child: const Icon(
-                      Icons.timer_outlined,
-                      size: 48,
-                      color: AppColors.textPrimary,
+                  Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: AppColors.border,
+                          width: 1,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'O',
+                          style: TextStyle(
+                            fontSize: 52,
+                            fontWeight: FontWeight.w200,
+                            color: AppColors.textPrimary,
+                            letterSpacing: -2,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // App name
+                  Center(
+                    child: Text(
+                      '오늘도',
+                      style: AppTextStyles.h1.copyWith(
+                        letterSpacing: 6,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 60),
+
+                  // Welcome text
                   Text(
-                    '오늘도',
-                    style: AppTextStyles.h1,
+                    '반갑습니다',
+                    style: AppTextStyles.h2.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '로그인하고 취미 활동을 기록하세요',
+                    '로그인하고 오늘의 취미를 기록하세요',
                     style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+
+                  // Email field
+                  Text(
+                    '이메일',
+                    style: AppTextStyles.labelMedium.copyWith(
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 48),
-
-                  // Email field
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      hintText: '이메일',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    style: AppTextStyles.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: 'email@example.com',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -114,22 +153,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Password field
+                  Text(
+                    '비밀번호',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _login(),
+                    style: AppTextStyles.bodyLarge,
                     decoration: InputDecoration(
-                      hintText: '비밀번호',
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                      hintText: '••••••••',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
+                          color: AppColors.textTertiary,
+                          size: 20,
                         ),
                         onPressed: () {
                           setState(() {
@@ -148,17 +199,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
 
                   // Login button
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _login,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: Text('로그인'),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        '로그인',
+                        style: AppTextStyles.button.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Sign up link
                   Row(
@@ -167,15 +231,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       Text(
                         '계정이 없으신가요?',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: AppColors.textTertiary,
                         ),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.signup),
-                        child: const Text('회원가입'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textPrimary,
+                        ),
+                        child: const Text(
+                          '회원가입',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),

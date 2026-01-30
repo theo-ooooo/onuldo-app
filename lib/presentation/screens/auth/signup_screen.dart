@@ -57,42 +57,58 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final isLoading = authState.status == AuthStatus.loading;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go(AppRoutes.login),
-        ),
-      ),
       body: LoadingOverlay(
         isLoading: isLoading,
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(height: 20),
+
+                  // Back button
+                  IconButton(
+                    onPressed: () => context.go(AppRoutes.login),
+                    icon: const Icon(Icons.arrow_back),
+                    style: IconButton.styleFrom(
+                      backgroundColor: AppColors.surface,
+                      padding: const EdgeInsets.all(12),
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Title
                   Text(
                     '회원가입',
-                    style: AppTextStyles.h1,
+                    style: AppTextStyles.h1.copyWith(
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '오늘도와 함께 취미 활동을 시작하세요',
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.textTertiary,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
 
                   // Nickname field
+                  _buildLabel('닉네임'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _nicknameController,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      hintText: '닉네임',
-                      prefixIcon: Icon(Icons.person_outlined),
+                    style: AppTextStyles.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: '2자 이상 입력',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -104,16 +120,21 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // Email field
+                  _buildLabel('이메일'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      hintText: '이메일',
-                      prefixIcon: Icon(Icons.email_outlined),
+                    style: AppTextStyles.bodyLarge,
+                    decoration: InputDecoration(
+                      hintText: 'email@example.com',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -125,21 +146,28 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // Password field
+                  _buildLabel('비밀번호'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.next,
+                    style: AppTextStyles.bodyLarge,
                     decoration: InputDecoration(
-                      hintText: '비밀번호',
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                      hintText: '6자 이상 입력',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
+                          color: AppColors.textTertiary,
+                          size: 20,
                         ),
                         onPressed: () {
                           setState(() {
@@ -158,22 +186,29 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // Confirm password field
+                  _buildLabel('비밀번호 확인'),
+                  const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: _obscureConfirmPassword,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _signUp(),
+                    style: AppTextStyles.bodyLarge,
                     decoration: InputDecoration(
-                      hintText: '비밀번호 확인',
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                      hintText: '비밀번호 재입력',
+                      hintStyle: AppTextStyles.bodyLarge.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscureConfirmPassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
+                          color: AppColors.textTertiary,
+                          size: 20,
                         ),
                         onPressed: () {
                           setState(() {
@@ -192,17 +227,30 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 40),
 
                   // Sign up button
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _signUp,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4),
-                      child: Text('회원가입'),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _signUp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        '가입하기',
+                        style: AppTextStyles.button.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Login link
                   Row(
@@ -211,20 +259,39 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       Text(
                         '이미 계정이 있으신가요?',
                         style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textSecondary,
+                          color: AppColors.textTertiary,
                         ),
                       ),
                       TextButton(
                         onPressed: () => context.go(AppRoutes.login),
-                        child: const Text('로그인'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textPrimary,
+                        ),
+                        child: const Text(
+                          '로그인',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Text(
+      text,
+      style: AppTextStyles.labelMedium.copyWith(
+        color: AppColors.textSecondary,
       ),
     );
   }
