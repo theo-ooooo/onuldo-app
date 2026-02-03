@@ -58,7 +58,7 @@ class SignUpRequest with _$SignUpRequest {
 @freezed
 class SignUpResponse with _$SignUpResponse {
   const factory SignUpResponse({
-    required int id,
+    @JsonKey(name: 'userId') required int userId,
     required String email,
     required String nickname,
   }) = _SignUpResponse;
