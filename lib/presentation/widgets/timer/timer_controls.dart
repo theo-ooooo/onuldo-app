@@ -25,13 +25,15 @@ class TimerControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (status == LocalTimerStatus.idle) ...[
           _buildCircleButton(
             icon: Icons.play_arrow,
-            color: AppColors.timerRunning,
+            color: colors.timerRunning,
             onPressed: canStart && !isLoading ? onStart : null,
             size: 72,
           ),
@@ -39,21 +41,21 @@ class TimerControls extends StatelessWidget {
           if (status == LocalTimerStatus.running)
             _buildCircleButton(
               icon: Icons.pause,
-              color: AppColors.timerPaused,
+              color: colors.timerPaused,
               onPressed: !isLoading ? onPause : null,
               size: 72,
             )
           else
             _buildCircleButton(
               icon: Icons.play_arrow,
-              color: AppColors.timerRunning,
+              color: colors.timerRunning,
               onPressed: !isLoading ? onResume : null,
               size: 72,
             ),
           const SizedBox(width: 32),
           _buildCircleButton(
             icon: Icons.stop,
-            color: AppColors.error,
+            color: colors.error,
             onPressed: !isLoading ? onStop : null,
             size: 56,
           ),

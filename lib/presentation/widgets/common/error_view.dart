@@ -14,6 +14,9 @@ class ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -23,13 +26,13 @@ class ErrorView extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 64,
-              color: AppColors.error.withValues(alpha: 0.7),
+              color: colors.error.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+              style: typography.subhead.copyWith(
+                color: colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -62,6 +65,9 @@ class EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -71,13 +77,13 @@ class EmptyView extends StatelessWidget {
             Icon(
               icon,
               size: 64,
-              color: AppColors.textTertiary,
+              color: colors.textTertiary,
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+              style: typography.subhead.copyWith(
+                color: colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),

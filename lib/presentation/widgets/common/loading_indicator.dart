@@ -14,12 +14,14 @@ class LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return SizedBox(
       width: size,
       height: size,
       child: CircularProgressIndicator(
         strokeWidth: 2.5,
-        color: color ?? AppColors.primary,
+        color: color ?? colors.textPrimary,
       ),
     );
   }
@@ -62,7 +64,11 @@ class FullScreenLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Scaffold(
+      backgroundColor: colors.background,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +78,7 @@ class FullScreenLoading extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 message!,
-                style: AppTextStyles.bodyMedium,
+                style: typography.subhead,
               ),
             ],
           ],

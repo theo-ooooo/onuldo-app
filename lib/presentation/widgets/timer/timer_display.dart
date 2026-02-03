@@ -17,13 +17,17 @@ class TimerDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final displayText = DurationFormatter.formatSeconds(seconds);
 
     return Text(
       displayText,
-      style: AppTextStyles.timer.copyWith(
-        color: color ?? AppColors.textPrimary,
+      style: TextStyle(
         fontSize: fontSize,
+        fontWeight: FontWeight.w200,
+        color: color ?? colors.textPrimary,
+        letterSpacing: 2,
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
     );
   }
@@ -43,18 +47,21 @@ class TimerCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final circleColor = color ?? colors.textPrimary;
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: color ?? AppColors.primary,
+          color: circleColor,
           width: 4,
         ),
         boxShadow: [
           BoxShadow(
-            color: (color ?? AppColors.primary).withValues(alpha: 0.2),
+            color: circleColor.withValues(alpha: 0.2),
             blurRadius: 20,
             spreadRadius: 5,
           ),

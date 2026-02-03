@@ -59,11 +59,28 @@ class ApiConstants {
   static String followCount(int userId) => '/api/follow/$userId/count';
 
   // Reaction endpoints
-  static const String reactions = '/api/reactions';
-  static String reactionsByRecord(int recordId) => '/api/reactions/record/$recordId';
-  static String reactionCount(int recordId) => '/api/reactions/record/$recordId/count';
-  static String removeReaction(int recordId) => '/api/reactions/record/$recordId';
+  static String recordReactions(int recordId) => '/api/records/$recordId/reactions';
+  static String recordReactionCount(int recordId) => '/api/records/$recordId/reactions/count';
+  static String recordMyReactions(int recordId) => '/api/records/$recordId/reactions/me';
+  static String removeReaction(int recordId, String emojiType) => '/api/records/$recordId/reactions/$emojiType';
+
+  // Comment endpoints
+  static String recordComments(int recordId) => '/api/records/$recordId/comments';
+  static String recordComment(int recordId, int commentId) => '/api/records/$recordId/comments/$commentId';
 
   // Statistics endpoints
-  static const String myStatistics = '/api/statistics/me';
+  static const String statisticsWeekly = '/api/statistics/weekly';
+  static const String statisticsMonthly = '/api/statistics/monthly';
+  static const String statisticsDaily = '/api/statistics/daily';
+  static const String statisticsHobbies = '/api/statistics/hobbies';
+  static const String statisticsStreak = '/api/statistics/streak';
+  static const String statisticsCalendar = '/api/statistics/calendar';
+
+  // User endpoints
+  static const String users = '/api/users';
+  static const String usersMe = '/api/users/me';
+  static String user(int userId) => '/api/users/$userId';
+  static String userFollow(int userId) => '/api/users/$userId/follow';
+  static String userFollowers(int userId) => '/api/users/$userId/followers';
+  static String userFollowing(int userId) => '/api/users/$userId/following';
 }
