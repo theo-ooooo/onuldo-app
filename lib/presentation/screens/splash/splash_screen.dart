@@ -1,9 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 
+@RoutePage()
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -51,13 +53,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   Future<void> _checkAuth() async {
     await Future.delayed(const Duration(milliseconds: 1500));
-    ref.read(authProvider.notifier).checkAuthStatus();
+    if (mounted) {
+      ref.read(authProvider.notifier).checkAuthStatus();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
@@ -74,16 +81,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF18181B),
+                        color: colors.textPrimary,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
                           '오',
                           style: TextStyle(
                             fontSize: 56,
                             fontWeight: FontWeight.w300,
-                            color: Color(0xFFFAFAFA),
+                            color: colors.background,
                             height: 1,
                           ),
                         ),
@@ -93,20 +100,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                     // Wordmark
                     Text(
                       '오늘도',
-                      style: TextStyle(
-                        fontSize: 28,
+                      style: typography.title1.copyWith(
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary,
                         letterSpacing: 4,
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'RECORD YOUR MOMENT',
-                      style: TextStyle(
-                        fontSize: 9,
+                      style: typography.caption2.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textTertiary,
+                        color: colors.textTertiary,
                         letterSpacing: 3,
                       ),
                     ),

@@ -1,10 +1,11 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/repositories/user_repository.dart';
 import 'presentation/providers/auth_provider.dart';
+import 'presentation/providers/theme_provider.dart';
 import 'presentation/router/app_router.dart';
 import 'shared/theme/app_theme.dart';
 
@@ -15,19 +16,25 @@ class OnuldoApp extends ConsumerStatefulWidget {
   ConsumerState<OnuldoApp> createState() => _OnuldoAppState();
 }
 
-class _OnuldoAppState extends ConsumerState<OnuldoApp> {
+class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // auth 상태 변경 감지해서 FCM 토큰 업데이트
-    Future.microtask(() {
-      ref.listen(authProvider, (prev, next) {
-        if (prev?.status != AuthStatus.authenticated &&
-            next.status == AuthStatus.authenticated) {
-          _updateFcmToken();
-        }
-      });
-    });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    super.didChangePlatformBrightness();
+    // 시스템 밝기 변경 감지
+    final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    ref.read(themeProvider.notifier).updateSystemBrightness(brightness);
   }
 
   Future<void> _updateFcmToken() async {
@@ -47,12 +54,24 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final themeState = ref.watch(themeProvider);
+
+    // auth 상태 변경 감지 (로그인 시 FCM 토큰 업데이트만 처리)
+    ref.listen(authProvider, (prev, next) {
+      // 로그인 성공 시 FCM 토큰 업데이트
+      if (prev?.status != AuthStatus.authenticated &&
+          next.status == AuthStatus.authenticated) {
+        _updateFcmToken();
+      }
+    });
 
     return MaterialApp.router(
       title: '오늘도',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      routerConfig: router,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeState.resolvedThemeMode,
+      routerConfig: router.config(),
     );
   }
 }

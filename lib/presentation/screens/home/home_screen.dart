@@ -1,86 +1,165 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/theme/app_theme.dart';
+import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 
-class HomeScreen extends StatelessWidget {
-  final Widget child;
-
-  const HomeScreen({
-    super.key,
-    required this.child,
-  });
+@RoutePage()
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   int _getCurrentIndex(BuildContext context) {
-    final location = GoRouterState.of(context).matchedLocation;
-    switch (location) {
-      case '/timer':
-        return 0;
-      case '/feed':
-        return 1;
-      case '/statistics':
-        return 2;
-      case '/profile':
-        return 3;
-      default:
-        return 0;
-    }
+    final location = context.router.current.name;
+    if (location == 'TimerRoute') return 0;
+    if (location == 'FeedRoute') return 1;
+    if (location == 'StatisticsRoute') return 2;
+    if (location == 'UserSearchRoute') return 3;
+    if (location == 'ProfileRoute') return 4;
+    return 0;
   }
 
-  void _onTap(BuildContext context, int index) {
+  void _onTap(BuildContext context, WidgetRef ref, int index, int currentIndex) {
     switch (index) {
       case 0:
-        context.go(AppRoutes.timer);
+        // 타이머 탭으로 이동할 때 현재 타이머 상태 새로고침
+        ref.read(timerProvider.notifier).loadCurrentTimer();
+        context.router.navigate(const TimerRoute());
         break;
       case 1:
-        context.go(AppRoutes.feed);
+        // 피드 탭으로 이동할 때 항상 새로고침
+        ref.read(feedProvider.notifier).refresh();
+        context.router.navigate(const FeedRoute());
         break;
       case 2:
-        context.go(AppRoutes.statistics);
+        // 통계 탭으로 이동할 때 통계 새로고침
+        ref.read(statisticsProvider.notifier).loadStatistics();
+        context.router.navigate(const StatisticsRoute());
         break;
       case 3:
-        context.go(AppRoutes.profile);
+        context.router.navigate(const UserSearchRoute());
+        break;
+      case 4:
+        // 프로필 탭으로 이동할 때 취미 목록 새로고침
+        ref.read(hobbyProvider.notifier).loadHobbies();
+        context.router.navigate(const ProfileRoute());
         break;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final currentIndex = _getCurrentIndex(context);
+
     return Scaffold(
-      body: child,
+      body: const AutoRouter(),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
+          color: colors.background,
+          border: Border(
+            top: BorderSide(
+              color: colors.separatorOpaque,
+              width: 0.5,
             ),
-          ],
+          ),
         ),
-        child: BottomNavigationBar(
-          currentIndex: _getCurrentIndex(context),
-          onTap: (index) => _onTap(context, index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.timer_outlined),
-              activeIcon: Icon(Icons.timer),
-              label: '타이머',
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _NavItem(
+                  icon: Icons.timer_outlined,
+                  activeIcon: Icons.timer,
+                  label: '타이머',
+                  isSelected: currentIndex == 0,
+                  onTap: () => _onTap(context, ref, 0, currentIndex),
+                ),
+                _NavItem(
+                  icon: Icons.article_outlined,
+                  activeIcon: Icons.article,
+                  label: '피드',
+                  isSelected: currentIndex == 1,
+                  onTap: () => _onTap(context, ref, 1, currentIndex),
+                ),
+                _NavItem(
+                  icon: Icons.bar_chart_outlined,
+                  activeIcon: Icons.bar_chart,
+                  label: '통계',
+                  isSelected: currentIndex == 2,
+                  onTap: () => _onTap(context, ref, 2, currentIndex),
+                ),
+                _NavItem(
+                  icon: Icons.search_outlined,
+                  activeIcon: Icons.search,
+                  label: '검색',
+                  isSelected: currentIndex == 3,
+                  onTap: () => _onTap(context, ref, 3, currentIndex),
+                ),
+                _NavItem(
+                  icon: Icons.person_outlined,
+                  activeIcon: Icons.person,
+                  label: '프로필',
+                  isSelected: currentIndex == 4,
+                  onTap: () => _onTap(context, ref, 4, currentIndex),
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.feed_outlined),
-              activeIcon: Icon(Icons.feed),
-              label: '피드',
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: Icon(
+                isSelected ? activeIcon : icon,
+                key: ValueKey(isSelected),
+                size: 24,
+                color: isSelected ? colors.textPrimary : colors.textTertiary,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart_outlined),
-              activeIcon: Icon(Icons.bar_chart),
-              label: '통계',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outlined),
-              activeIcon: Icon(Icons.person),
-              label: '프로필',
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: typography.caption2.copyWith(
+                color: isSelected ? colors.textPrimary : colors.textTertiary,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              ),
             ),
           ],
         ),
