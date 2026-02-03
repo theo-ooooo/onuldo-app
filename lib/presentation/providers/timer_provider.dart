@@ -209,6 +209,12 @@ class TimerNotifier extends StateNotifier<TimerState> {
     state = state.copyWith(error: null);
   }
 
+  /// 상태 초기화 (로그아웃 시 호출)
+  void reset() {
+    _stopLocalTimer();
+    state = const TimerState();
+  }
+
   @override
   void dispose() {
     _stopLocalTimer();

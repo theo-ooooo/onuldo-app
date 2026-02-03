@@ -101,14 +101,14 @@ class HobbyNotifier extends StateNotifier<HobbyListState> {
   }
 
   Future<bool> deleteHobby(int id) async {
-    state = state.copyWith(isLoading: true, error: null);
-
+    // 삭제 중에는 로딩 상태를 표시하지 않음 (즉시 UI 업데이트)
     try {
       await _hobbyRepository.deleteHobby(id);
       final hobbies = state.hobbies.where((hobby) => hobby.id != id).toList();
       state = state.copyWith(
         hobbies: hobbies,
         isLoading: false,
+        error: null,
         selectedHobby: state.selectedHobby?.id == id ? null : state.selectedHobby,
         clearSelectedHobby: state.selectedHobby?.id == id,
       );
@@ -132,6 +132,11 @@ class HobbyNotifier extends StateNotifier<HobbyListState> {
 
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  /// 상태 초기화 (로그아웃 시 호출)
+  void reset() {
+    state = const HobbyListState();
   }
 }
 

@@ -65,10 +65,47 @@ class AuthRepository {
         return apiResponse.data!;
       }
 
+      // error 객체에서 메시지 추출
+      String errorMessage = '회원가입에 실패했습니다.';
+      if (response.data is Map) {
+        final data = response.data as Map<String, dynamic>;
+        if (data['error'] is Map) {
+          final error = data['error'] as Map<String, dynamic>;
+          errorMessage = error['message'] as String? ?? errorMessage;
+        } else if (data['message'] is String) {
+          errorMessage = data['message'] as String;
+        } else if (apiResponse.message != null) {
+          errorMessage = apiResponse.message!;
+        }
+      }
+
       throw ApiException(
-        message: apiResponse.message ?? '회원가입에 실패했습니다.',
+        message: errorMessage,
+        statusCode: response.statusCode,
+        data: response.data,
       );
     } on DioException catch (e) {
+      // DioException에서도 error 객체에서 메시지 추출 시도
+      String errorMessage = '회원가입에 실패했습니다.';
+      if (e.response?.data is Map) {
+        final data = e.response!.data as Map<String, dynamic>;
+        if (data['error'] is Map) {
+          final error = data['error'] as Map<String, dynamic>;
+          errorMessage = error['message'] as String? ?? errorMessage;
+        } else if (data['message'] is String) {
+          errorMessage = data['message'] as String;
+        }
+      }
+      
+      // 에러 메시지를 파싱했으면 그것을 사용, 아니면 기본 파싱 사용
+      if (errorMessage != '회원가입에 실패했습니다.') {
+        throw ApiException(
+          message: errorMessage,
+          statusCode: e.response?.statusCode,
+          data: e.response?.data,
+        );
+      }
+      
       throw ApiException.fromDioException(e);
     }
   }

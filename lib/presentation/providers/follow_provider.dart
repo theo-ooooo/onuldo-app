@@ -153,6 +153,11 @@ class FollowNotifier extends StateNotifier<FollowState> {
   void clearError() {
     state = state.copyWith(error: null);
   }
+
+  /// 상태 초기화 (로그아웃 시 호출)
+  void reset() {
+    state = const FollowState();
+  }
 }
 
 final followProvider = StateNotifierProvider<FollowNotifier, FollowState>((ref) {

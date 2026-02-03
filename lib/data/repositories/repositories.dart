@@ -6,3 +6,4 @@ export 'feed_repository.dart';
 export 'follow_repository.dart';
 export 'reaction_repository.dart';
 export 'statistics_repository.dart';
+export 'comment_repository.dart';

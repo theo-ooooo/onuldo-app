@@ -27,3 +27,6 @@ export 'reaction/reaction_models.dart';
 
 // Statistics
 export 'statistics/statistics_models.dart';
+
+// Comment
+export 'comment/comment_models.dart';

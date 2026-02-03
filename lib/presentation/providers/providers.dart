@@ -6,3 +6,5 @@ export 'feed_provider.dart';
 export 'follow_provider.dart';
 export 'statistics_provider.dart';
 export 'user_provider.dart';
+export 'theme_provider.dart';
+export 'comment_provider.dart';

@@ -44,19 +44,28 @@ class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier(this._authRepository, this._storage) : super(const AuthState());
 
   Future<void> checkAuthStatus() async {
-    state = state.copyWith(status: AuthStatus.loading);
+    state = state.copyWith(
+      status: AuthStatus.loading,
+    );
 
     final hasToken = await AuthInterceptor.hasTokens(_storage);
 
     if (hasToken) {
-      state = state.copyWith(status: AuthStatus.authenticated);
+      state = state.copyWith(
+        status: AuthStatus.authenticated,
+      );
     } else {
-      state = state.copyWith(status: AuthStatus.unauthenticated);
+      state = state.copyWith(
+        status: AuthStatus.unauthenticated,
+      );
     }
   }
 
   Future<bool> login(String email, String password) async {
-    state = state.copyWith(status: AuthStatus.loading, error: null);
+    state = state.copyWith(
+      status: AuthStatus.loading,
+      error: null,
+    );
 
     try {
       final result = await _authRepository.login(
@@ -83,10 +92,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<bool> signUp(String email, String password, String nickname) async {
-    state = state.copyWith(status: AuthStatus.loading, error: null);
+    state = state.copyWith(
+      status: AuthStatus.loading,
+      error: null,
+    );
 
     try {
-      await _authRepository.signUp(
+      final signUpResponse = await _authRepository.signUp(
         SignUpRequest(
           email: email,
           password: password,
@@ -95,8 +107,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       // Auto login after signup
-      return login(email, password);
+      final loginSuccess = await login(email, password);
+      
+      if (loginSuccess) {
+        return true;
+      } else {
+        // 로그인 실패 시에도 회원가입은 성공했으므로 에러만 표시
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          error: '회원가입은 완료되었지만 자동 로그인에 실패했습니다. 로그인 페이지에서 다시 시도해주세요.',
+        );
+        return false;
+      }
     } on ApiException catch (e) {
+      // 에러 발생 시에도 회원가입 페이지에 머물도록 상태 유지
       state = state.copyWith(
         status: AuthStatus.unauthenticated,
         error: e.message,
@@ -111,7 +135,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(
+      error: null,
+    );
   }
 }
 
