@@ -1,12 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/utils/duration_formatter.dart';
 import '../../../data/models/models.dart';
 import '../../providers/providers.dart';
 
+@RoutePage()
 class CreateRecordScreen extends ConsumerStatefulWidget {
   final int? timerId;
   final int? hobbyId;
@@ -36,11 +37,13 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
   }
 
   Future<void> _saveRecord() async {
+    final colors = context.colors;
+
     if (widget.timerId == null || widget.hobbyId == null || widget.durationSeconds == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('기록 정보가 올바르지 않습니다'),
-          backgroundColor: AppColors.error,
+          content: const Text('기록 정보가 올바르지 않습니다'),
+          backgroundColor: colors.error,
         ),
       );
       return;
@@ -61,18 +64,18 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
     if (record != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('기록이 저장되었습니다'),
-          backgroundColor: AppColors.timerRunning,
+          content: const Text('기록이 저장되었습니다'),
+          backgroundColor: colors.timerRunning,
         ),
       );
-      context.pop();
+      context.router.maybePop();
     } else {
       final error = ref.read(recordProvider).error;
       if (error != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(error),
-            backgroundColor: AppColors.error,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -82,29 +85,31 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
   @override
   Widget build(BuildContext context) {
     final recordState = ref.watch(recordProvider);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => context.router.maybePop(),
                     child: Container(
-                      width: 44,
-                      height: 44,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
                         Icons.close,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                         size: 20,
                       ),
                     ),
@@ -112,36 +117,33 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                   const SizedBox(width: 12),
                   Text(
                     '기록 저장',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: 2,
-                    ),
+                    style: typography.title3,
                   ),
                   const Spacer(),
                   GestureDetector(
                     onTap: recordState.isLoading ? null : _saveRecord,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 10,
+                        horizontal: 16,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.textPrimary,
-                        borderRadius: BorderRadius.circular(12),
+                        color: colors.textPrimary,
+                        borderRadius: BorderRadius.circular(10),
                       ),
                       child: recordState.isLoading
                           ? SizedBox(
-                              width: 20,
-                              height: 20,
+                              width: 18,
+                              height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.background,
+                                color: colors.background,
                               ),
                             )
                           : Text(
                               '저장',
-                              style: AppTextStyles.labelMedium.copyWith(
-                                color: AppColors.background,
+                              style: typography.subhead.copyWith(
+                                color: colors.background,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -151,64 +153,64 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Summary card
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(32),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.border),
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
                         children: [
                           // Hobby name chip
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                              horizontal: 14,
+                              vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.timerRunning.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
+                              color: colors.timerRunning.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  width: 8,
-                                  height: 8,
+                                  width: 6,
+                                  height: 6,
                                   decoration: BoxDecoration(
-                                    color: AppColors.timerRunning,
+                                    color: colors.timerRunning,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   widget.hobbyName ?? '취미',
-                                  style: AppTextStyles.labelMedium.copyWith(
-                                    color: AppColors.timerRunning,
+                                  style: typography.footnote.copyWith(
+                                    color: colors.timerRunning,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
                           Text(
                             DurationFormatter.formatSeconds(widget.durationSeconds ?? 0),
                             style: TextStyle(
-                              fontSize: 48,
+                              fontSize: 44,
                               fontWeight: FontWeight.w200,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                               letterSpacing: 2,
                               fontFeatures: const [FontFeature.tabularFigures()],
                             ),
@@ -218,64 +220,63 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                             DurationFormatter.formatHumanReadable(
                               Duration(seconds: widget.durationSeconds ?? 0),
                             ),
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textTertiary,
+                            style: typography.subhead.copyWith(
+                              color: colors.textTertiary,
                             ),
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // Memo field
                     Text(
                       '메모',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.textSecondary,
+                      style: typography.headline.copyWith(
+                        color: colors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
+                        color: colors.surface,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextField(
                         controller: _memoController,
                         maxLines: 4,
                         maxLength: 500,
-                        style: AppTextStyles.bodyLarge,
+                        style: typography.body,
                         decoration: InputDecoration(
                           hintText: '오늘의 활동은 어땠나요?',
-                          hintStyle: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textTertiary,
+                          hintStyle: typography.body.copyWith(
+                            color: colors.textTertiary,
                           ),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.all(16),
-                          counterStyle: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textTertiary,
+                          counterStyle: typography.caption1.copyWith(
+                            color: colors.textTertiary,
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
 
                     // Visibility selector
                     Text(
                       '공개 범위',
-                      style: AppTextStyles.labelLarge.copyWith(
-                        color: AppColors.textSecondary,
+                      style: typography.headline.copyWith(
+                        color: colors.textSecondary,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     Row(
                       children: Visibility.values.map((v) {
                         final isSelected = _visibility == v;
                         return Padding(
-                          padding: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.only(right: 8),
                           child: _VisibilityChip(
                             label: _visibilityLabel(v),
                             isSelected: isSelected,
@@ -289,11 +290,11 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                       }).toList(),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Text(
                       _visibilityDescription(_visibility),
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textTertiary,
+                      style: typography.footnote.copyWith(
+                        color: colors.textTertiary,
                       ),
                     ),
 
@@ -338,22 +339,25 @@ class _VisibilityChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? colors.textPrimary : colors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.border,
+            color: isSelected ? colors.textPrimary : colors.separatorOpaque,
           ),
         ),
         child: Text(
           label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? AppColors.background : AppColors.textSecondary,
+          style: typography.subhead.copyWith(
+            color: isSelected ? colors.background : colors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),

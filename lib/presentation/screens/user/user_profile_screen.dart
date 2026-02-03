@@ -1,11 +1,12 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/providers.dart';
 import '../../widgets/widgets.dart';
 
+@RoutePage()
 class UserProfileScreen extends ConsumerStatefulWidget {
   final int userId;
 
@@ -46,8 +47,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     final state = ref.watch(userProfileProvider);
     final authState = ref.watch(authProvider);
     final isMyProfile = authState.user?.id == widget.userId;
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: state.isLoading
             ? const Center(child: LoadingIndicator(size: 48))
@@ -59,7 +63,14 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         .loadUser(widget.userId),
                   )
                 : state.user == null
-                    ? const Center(child: Text('사용자를 찾을 수 없습니다'))
+                    ? Center(
+                        child: Text(
+                          '사용자를 찾을 수 없습니다',
+                          style: typography.body.copyWith(
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      )
                     : _buildContent(state, isMyProfile),
       ),
     );
@@ -67,27 +78,28 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
   Widget _buildContent(UserProfileState state, bool isMyProfile) {
     final user = state.user!;
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Column(
       children: [
         // Header
         Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
           child: Row(
             children: [
               GestureDetector(
-                onTap: () => context.pop(),
+                onTap: () => context.router.maybePop(),
                 child: Container(
-                  width: 44,
-                  height: 44,
+                  width: 40,
+                  height: 40,
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     Icons.arrow_back,
-                    color: AppColors.textPrimary,
+                    color: colors.textSecondary,
                     size: 20,
                   ),
                 ),
@@ -96,10 +108,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               Expanded(
                 child: Text(
                   user.nickname,
-                  style: AppTextStyles.h3.copyWith(
-                    fontWeight: FontWeight.w400,
-                    letterSpacing: 2,
-                  ),
+                  style: typography.title3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -107,18 +116,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           ),
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
 
         // Profile card
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.border),
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               children: [
@@ -127,12 +135,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    color: colors.surfaceSecondary,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: AppColors.border,
-                      width: 2,
-                    ),
                     image: user.profileImageUrl != null
                         ? DecorationImage(
                             image: NetworkImage(user.profileImageUrl!),
@@ -147,7 +151,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             style: TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w300,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
                         )
@@ -156,16 +160,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 const SizedBox(height: 16),
                 Text(
                   user.nickname,
-                  style: AppTextStyles.h3.copyWith(
-                    fontWeight: FontWeight.w500,
+                  style: typography.title3.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (user.bio != null && user.bio!.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
                     user.bio!,
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textTertiary,
+                    style: typography.subhead.copyWith(
+                      color: colors.textTertiary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -184,7 +188,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       width: 1,
                       height: 32,
                       margin: const EdgeInsets.symmetric(horizontal: 24),
-                      color: AppColors.border,
+                      color: colors.separatorOpaque,
                     ),
                     _StatItem(
                       label: '팔로잉',
@@ -220,7 +224,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
         // Tabs
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
             children: [
               _TabButton(
@@ -231,7 +235,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   setState(() {});
                 },
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               _TabButton(
                 label: '팔로잉 ${user.followingCount}',
                 isSelected: _tabController.index == 1,
@@ -272,19 +276,22 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Column(
       children: [
         Text(
           value,
-          style: AppTextStyles.h3.copyWith(
+          style: typography.title3.copyWith(
             fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: AppColors.textTertiary,
+          style: typography.footnote.copyWith(
+            color: colors.textTertiary,
           ),
         ),
       ],
@@ -303,23 +310,26 @@ class _FollowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isFollowing ? AppColors.surface : const Color(0xFF18181B),
+          color: isFollowing ? colors.surface : colors.textPrimary,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isFollowing ? AppColors.border : const Color(0xFF18181B),
+            color: isFollowing ? colors.separatorOpaque : colors.textPrimary,
           ),
         ),
         child: Center(
           child: Text(
             isFollowing ? '팔로잉' : '팔로우',
-            style: AppTextStyles.button.copyWith(
-              color: isFollowing ? AppColors.textPrimary : Colors.white,
+            style: typography.headline.copyWith(
+              color: isFollowing ? colors.textPrimary : colors.background,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -342,21 +352,24 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF18181B) : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? colors.textPrimary : colors.surface,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? const Color(0xFF18181B) : AppColors.border,
+            color: isSelected ? colors.textPrimary : colors.separatorOpaque,
           ),
         ),
         child: Text(
           label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+          style: typography.subhead.copyWith(
+            color: isSelected ? colors.background : colors.textSecondary,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -372,20 +385,28 @@ class _FollowList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     if (users.isEmpty) {
       return Center(
         child: Text(
           '목록이 비어있습니다',
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textTertiary,
+          style: typography.subhead.copyWith(
+            color: colors.textTertiary,
           ),
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: users.length,
+      separatorBuilder: (context, index) => Divider(
+        height: 1,
+        color: colors.separatorOpaque,
+        indent: 68,
+      ),
       itemBuilder: (context, index) {
         final user = users[index];
         return _FollowUserTile(user: user);
@@ -401,21 +422,18 @@ class _FollowUserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
+              color: colors.surfaceSecondary,
               borderRadius: BorderRadius.circular(12),
               image: user.profileImageUrl != null
                   ? DecorationImage(
@@ -431,7 +449,7 @@ class _FollowUserTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   )
@@ -441,22 +459,22 @@ class _FollowUserTile extends StatelessWidget {
           Expanded(
             child: Text(
               user.nickname,
-              style: AppTextStyles.bodyLarge.copyWith(
+              style: typography.body.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           if (user.isFollowing)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(12),
+                color: colors.surfaceSecondary,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 '팔로잉',
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.textSecondary,
+                style: typography.caption1.copyWith(
+                  color: colors.textSecondary,
                 ),
               ),
             ),

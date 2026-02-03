@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,7 +7,9 @@ import '../../../core/utils/duration_formatter.dart';
 import '../../../data/models/models.dart';
 import '../../providers/providers.dart';
 import '../../widgets/widgets.dart';
+import '../../router/app_router.dart';
 
+@RoutePage()
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
 
@@ -52,24 +55,23 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
-                  const AppLogoIcon(size: 44),
-                  const SizedBox(width: 12),
                   Text(
                     '피드',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 2,
-                    ),
+                    style: typography.largeTitle,
                   ),
                   const Spacer(),
                   _SortButton(
@@ -82,20 +84,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Feed type selector
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  _FeedTypeChip(
+                  AppChip(
                     label: '전체',
                     isSelected: _selectedFeedType == FeedType.all,
                     onTap: () => _changeFeedType(FeedType.all),
                   ),
-                  const SizedBox(width: 12),
-                  _FeedTypeChip(
+                  const SizedBox(width: 8),
+                  AppChip(
                     label: '팔로잉',
                     isSelected: _selectedFeedType == FeedType.following,
                     onTap: () => _changeFeedType(FeedType.following),
@@ -104,7 +106,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
             // Feed content
             Expanded(
@@ -117,6 +119,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Widget _buildBody(FeedState state) {
+    final colors = context.colors;
+
     if (state.isLoading && state.items.isEmpty) {
       return const Center(child: LoadingIndicator(size: 48));
     }
@@ -136,12 +140,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
     return RefreshIndicator(
       onRefresh: () => ref.read(feedProvider.notifier).refresh(),
-      color: AppColors.textPrimary,
-      backgroundColor: AppColors.surface,
-      child: ListView.builder(
+      color: colors.textPrimary,
+      backgroundColor: colors.surface,
+      child: ListView.separated(
         controller: _scrollController,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.only(bottom: 24),
         itemCount: state.items.length + (state.hasMore ? 1 : 0),
+        separatorBuilder: (context, index) => const AppSeparator.full(),
         itemBuilder: (context, index) {
           if (index == state.items.length) {
             return const Padding(
@@ -151,54 +156,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           }
 
           final item = state.items[index];
-          return _FeedCard(
+          return _FeedItem(
             item: item,
             onReaction: (emoji) {
-              if (item.myReaction == emoji) {
-                ref.read(feedProvider.notifier).removeReaction(item.recordId);
-              } else {
-                ref.read(feedProvider.notifier).addReaction(item.recordId, emoji);
-              }
+              ref.read(feedProvider.notifier).toggleReaction(item.recordId, emoji);
+            },
+            onUserTap: () {
+              context.router.push(UserProfileRoute(userId: item.userId));
+            },
+            onCommentTap: () {
+              showCommentBottomSheet(context, item.recordId);
             },
           );
         },
-      ),
-    );
-  }
-}
-
-class _FeedTypeChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FeedTypeChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? AppColors.background : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
       ),
     );
   }
@@ -215,33 +185,35 @@ class _SortButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return PopupMenuButton<SortType>(
       onSelected: onChanged,
       offset: const Offset(0, 40),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      color: AppColors.surface,
+      color: colors.surface,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.sort,
+              Icons.sort_rounded,
               size: 18,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             Text(
               sortType == SortType.latest ? '최신순' : '인기순',
-              style: AppTextStyles.labelSmall.copyWith(
-                color: AppColors.textSecondary,
+              style: typography.footnote.copyWith(
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -256,15 +228,13 @@ class _SortButton extends StatelessWidget {
                 Icons.check,
                 size: 16,
                 color: sortType == SortType.latest
-                    ? AppColors.textPrimary
+                    ? colors.textPrimary
                     : Colors.transparent,
               ),
               const SizedBox(width: 8),
               Text(
                 '최신순',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style: typography.body,
               ),
             ],
           ),
@@ -277,15 +247,13 @@ class _SortButton extends StatelessWidget {
                 Icons.check,
                 size: 16,
                 color: sortType == SortType.popular
-                    ? AppColors.textPrimary
+                    ? colors.textPrimary
                     : Colors.transparent,
               ),
               const SizedBox(width: 8),
               Text(
                 '인기순',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+                style: typography.body,
               ),
             ],
           ),
@@ -302,31 +270,33 @@ class _EmptyFeedView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.border),
+              color: colors.surfaceSecondary,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              Icons.feed_outlined,
-              size: 36,
-              color: AppColors.textTertiary,
+              Icons.article_outlined,
+              size: 28,
+              color: colors.textTertiary,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Text(
             feedType == FeedType.following
                 ? '팔로우한 사람의 기록이 없습니다'
                 : '아직 기록이 없습니다',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textTertiary,
+            style: typography.body.copyWith(
+              color: colors.textTertiary,
             ),
           ),
         ],
@@ -335,179 +305,235 @@ class _EmptyFeedView extends StatelessWidget {
   }
 }
 
-class _FeedCard extends StatelessWidget {
+class _FeedItem extends StatelessWidget {
   final FeedItemResponse item;
   final ValueChanged<EmojiType> onReaction;
+  final VoidCallback? onUserTap;
+  final VoidCallback? onCommentTap;
 
-  const _FeedCard({
+  const _FeedItem({
     required this.item,
     required this.onReaction,
+    this.onUserTap,
+    this.onCommentTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        color: colors.surface,
+        border: Border(
+          bottom: BorderSide(
+            color: colors.surfaceSecondary,
+            width: 1,
+          ),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User info row
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12),
-                  image: item.userProfileImageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(item.userProfileImageUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: item.userProfileImageUrl == null
-                    ? Center(
-                        child: Text(
-                          item.userNickname[0].toUpperCase(),
-                          style: AppTextStyles.labelLarge.copyWith(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w600,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // User info row
+            GestureDetector(
+              onTap: onUserTap,
+              behavior: HitTestBehavior.opaque,
+              child: Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: colors.surfaceSecondary,
+                      shape: BoxShape.circle,
+                      image: item.userProfileImageUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(item.userProfileImageUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: item.userProfileImageUrl == null
+                        ? Center(
+                            child: Text(
+                              item.userNickname[0].toUpperCase(),
+                              style: typography.headline.copyWith(
+                                color: colors.textSecondary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              item.userNickname,
+                              style: typography.headline.copyWith(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: colors.timerRunning.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                item.hobbyName,
+                                style: typography.caption1.copyWith(
+                                  color: colors.timerRunning,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          item.createdAt != null
+                              ? _formatTime(item.createdAt!)
+                              : item.activityDate,
+                          style: typography.footnote.copyWith(
+                            color: colors.textTertiary,
+                            fontSize: 11,
                           ),
                         ),
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.userNickname,
-                      style: AppTextStyles.labelLarge.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.createdAt != null
-                          ? _formatTime(item.createdAt!)
-                          : item.activityDate,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+            ),
+
+            const SizedBox(height: 14),
+
+            // Duration
+            Row(
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 16,
+                  color: colors.timerRunning,
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  item.hobbyName,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.textSecondary,
+                const SizedBox(width: 6),
+                Text(
+                  DurationFormatter.formatHumanReadable(
+                    Duration(seconds: item.durationSeconds),
+                  ),
+                  style: typography.title3.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary,
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 20),
-
-          // Duration
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.timerRunning.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.timer_outlined,
-                  size: 18,
-                  color: AppColors.timerRunning,
-                ),
-              ),
-              const SizedBox(width: 12),
+            // Memo
+            if (item.memo != null && item.memo!.isNotEmpty) ...[
+              const SizedBox(height: 12),
               Text(
-                DurationFormatter.formatHumanReadable(
-                  Duration(seconds: item.durationSeconds),
-                ),
-                style: AppTextStyles.h4.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-
-          if (item.memo != null && item.memo!.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
                 item.memo!,
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
+                style: typography.body.copyWith(
+                  color: colors.textSecondary,
+                  fontSize: 14,
                   height: 1.5,
                 ),
               ),
-            ),
-          ],
+            ],
 
-          const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-          // Divider
-          Container(
-            height: 1,
-            color: AppColors.border,
-          ),
-
-          const SizedBox(height: 16),
-
-          // Reactions
-          Row(
-            children: [
-              ...EmojiType.values.map((emoji) => Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: _ReactionButton(
-                      emoji: emoji,
-                      isSelected: item.myReaction == emoji,
-                      onTap: () => onReaction(emoji),
-                    ),
-                  )),
-              const Spacer(),
-              if (item.reactionCount > 0)
-                Text(
-                  '${item.reactionCount}',
-                  style: AppTextStyles.labelMedium.copyWith(
-                    color: AppColors.textTertiary,
+            // Reactions and Comments
+            Row(
+              children: [
+                Expanded(
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      ...EmojiType.values.map((emoji) => _ReactionButton(
+                            emoji: emoji,
+                            count: item.getReactionCount(emoji),
+                            isSelected: item.hasMyReaction(emoji),
+                            onTap: () => onReaction(emoji),
+                          )),
+                      // Comment button
+                      GestureDetector(
+                        onTap: onCommentTap,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.chat_bubble_outline_rounded,
+                                size: 16,
+                                color: colors.textTertiary,
+                              ),
+                              if (item.commentCount > 0) ...[
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${item.commentCount}',
+                                  style: typography.caption1.copyWith(
+                                    color: colors.textTertiary,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-            ],
-          ),
-        ],
+                if (item.totalReactionCount > 0)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.favorite_rounded,
+                        size: 14,
+                        color: colors.textTertiary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${item.totalReactionCount}',
+                        style: typography.footnote.copyWith(
+                          color: colors.textTertiary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -532,34 +558,54 @@ class _FeedCard extends StatelessWidget {
 
 class _ReactionButton extends StatelessWidget {
   final EmojiType emoji;
+  final int count;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _ReactionButton({
     required this.emoji,
+    required this.count,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.textPrimary.withValues(alpha: 0.1)
-              : AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(20),
-          border: isSelected
-              ? Border.all(color: AppColors.textPrimary.withValues(alpha: 0.3))
-              : null,
+              ? colors.timerRunning.withValues(alpha: 0.12)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
         ),
-        child: Text(
-          emoji.emoji,
-          style: const TextStyle(fontSize: 16),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              emoji.emoji,
+              style: const TextStyle(fontSize: 16),
+            ),
+            if (count > 0) ...[
+              const SizedBox(width: 3),
+              Text(
+                '$count',
+                style: typography.caption1.copyWith(
+                  color: isSelected
+                      ? colors.timerRunning
+                      : colors.textTertiary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

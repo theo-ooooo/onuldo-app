@@ -1,6 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../data/models/models.dart';
@@ -9,6 +9,7 @@ import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/widgets.dart';
 
+@RoutePage()
 class TimerScreen extends ConsumerStatefulWidget {
   const TimerScreen({super.key});
 
@@ -35,10 +36,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => _HobbySelectorSheet(
         hobbies: hobbies,
         selectedHobby: ref.read(hobbyProvider).selectedHobby,
@@ -56,25 +54,23 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
 
   void _showAddHobbyDialog() {
     final nameController = TextEditingController();
+    final colors = context.colors;
+    final typography = context.typography;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
         title: Text(
           '새 취미 추가',
-          style: AppTextStyles.h4,
+          style: typography.title3,
         ),
         content: TextField(
           controller: nameController,
-          style: AppTextStyles.bodyLarge,
+          style: typography.body,
           decoration: InputDecoration(
             hintText: '취미 이름을 입력하세요',
-            hintStyle: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textTertiary,
+            hintStyle: typography.body.copyWith(
+              color: colors.textTertiary,
             ),
           ),
           autofocus: true,
@@ -84,7 +80,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               '취소',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: colors.textSecondary),
             ),
           ),
           TextButton(
@@ -102,7 +98,7 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
             child: Text(
               '추가',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -126,14 +122,13 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
     final selectedHobby = ref.read(hobbyProvider).selectedHobby;
     final result = await ref.read(timerProvider.notifier).stopTimer();
     if (result != null && mounted) {
-      context.push(
-        AppRoutes.createRecord,
-        extra: {
-          'timerId': result.id,
-          'hobbyId': result.hobbyId,
-          'hobbyName': selectedHobby?.name ?? '',
-          'durationSeconds': result.durationSeconds,
-        },
+      context.router.push(
+        CreateRecordRoute(
+          timerId: result.id,
+          hobbyId: result.hobbyId,
+          hobbyName: selectedHobby?.name,
+          durationSeconds: result.durationSeconds,
+        ),
       );
     }
   }
@@ -142,35 +137,51 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
   Widget build(BuildContext context) {
     final hobbyState = ref.watch(hobbyProvider);
     final timerState = ref.watch(timerProvider);
+    final colors = context.colors;
+    final typography = context.typography;
 
     final isRunning = timerState.status == LocalTimerStatus.running;
     final isIdle = timerState.status == LocalTimerStatus.idle;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
 
-              // Header with logo
-              const AppLogoWithText(iconSize: 44, fontSize: 20),
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const AppLogoIcon(size: 32),
+                  const SizedBox(width: 8),
+                  Text(
+                    '오늘도',
+                    style: typography.title3.copyWith(
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 40),
 
               // Hobby selector
               GestureDetector(
                 onTap: isIdle ? _showHobbySelector : null,
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
+                    horizontal: 20,
+                    vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.border),
+                    color: colors.surface,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -180,26 +191,25 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: hobbyState.selectedHobby != null
-                              ? AppColors.timerRunning
-                              : AppColors.textTertiary,
+                              ? colors.timerRunning
+                              : colors.textTertiary,
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Text(
                         hobbyState.selectedHobby?.name ?? '취미 선택',
-                        style: AppTextStyles.bodyLarge.copyWith(
+                        style: typography.body.copyWith(
                           color: hobbyState.selectedHobby != null
-                              ? AppColors.textPrimary
-                              : AppColors.textTertiary,
-                          fontWeight: FontWeight.w500,
+                              ? colors.textPrimary
+                              : colors.textTertiary,
                         ),
                       ),
                       if (isIdle) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         Icon(
                           Icons.unfold_more,
-                          color: AppColors.textTertiary,
+                          color: colors.textTertiary,
                           size: 18,
                         ),
                       ],
@@ -210,74 +220,74 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
 
               const Spacer(),
 
-              // Timer display
-              Column(
-                children: [
-                  // Status indicator
-                  if (!isIdle)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isRunning
-                            ? AppColors.timerRunning.withValues(alpha: 0.15)
-                            : AppColors.timerPaused.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: isRunning
-                                  ? AppColors.timerRunning
-                                  : AppColors.timerPaused,
-                              shape: BoxShape.circle,
+              // Status indicator
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: !isIdle
+                    ? Container(
+                        key: ValueKey(isRunning),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (isRunning ? colors.timerRunning : colors.timerPaused)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: isRunning
+                                    ? colors.timerRunning
+                                    : colors.timerPaused,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            isRunning ? '진행 중' : '일시정지',
-                            style: AppTextStyles.labelMedium.copyWith(
-                              color: isRunning
-                                  ? AppColors.timerRunning
-                                  : AppColors.timerPaused,
+                            const SizedBox(width: 8),
+                            Text(
+                              isRunning ? '진행 중' : '일시정지',
+                              style: typography.footnote.copyWith(
+                                color: isRunning
+                                    ? colors.timerRunning
+                                    : colors.timerPaused,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      )
+                    : const SizedBox(height: 28),
+              ),
 
-                  const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
-                  // Time display
-                  Text(
-                    DurationFormatter.formatSeconds(timerState.elapsedSeconds),
-                    style: TextStyle(
-                      fontSize: 72,
-                      fontWeight: FontWeight.w200,
-                      color: AppColors.textPrimary,
-                      letterSpacing: 4,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
+              // Time display
+              Text(
+                DurationFormatter.formatSeconds(timerState.elapsedSeconds),
+                style: TextStyle(
+                  fontSize: 72,
+                  fontWeight: FontWeight.w100,
+                  color: colors.textPrimary,
+                  letterSpacing: 4,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
 
-                  const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-                  // Duration in readable format
-                  Text(
-                    DurationFormatter.formatHumanReadable(
-                      Duration(seconds: timerState.elapsedSeconds),
-                    ),
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ],
+              // Human readable duration
+              Text(
+                DurationFormatter.formatHumanReadable(
+                  Duration(seconds: timerState.elapsedSeconds),
+                ),
+                style: typography.body.copyWith(
+                  color: colors.textTertiary,
+                ),
               ),
 
               const Spacer(),
@@ -285,14 +295,15 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
               // Controls
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Stop button (only when not idle)
                   if (!isIdle) ...[
-                    // Stop button
                     _ControlButton(
                       icon: Icons.stop_rounded,
                       onTap: timerState.isLoading ? null : _stopTimer,
-                      backgroundColor: AppColors.surface,
-                      iconColor: AppColors.error,
+                      backgroundColor: colors.surface,
+                      iconColor: colors.error,
                       size: 56,
                     ),
                     const SizedBox(width: 24),
@@ -302,7 +313,9 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                   _ControlButton(
                     icon: isIdle
                         ? Icons.play_arrow_rounded
-                        : (isRunning ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                        : (isRunning
+                            ? Icons.pause_rounded
+                            : Icons.play_arrow_rounded),
                     onTap: timerState.isLoading
                         ? null
                         : (isIdle
@@ -310,10 +323,9 @@ class _TimerScreenState extends ConsumerState<TimerScreen> {
                             : (isRunning
                                 ? () => ref.read(timerProvider.notifier).pauseTimer()
                                 : () => ref.read(timerProvider.notifier).resumeTimer())),
-                    backgroundColor: AppColors.textPrimary,
-                    iconColor: AppColors.background,
+                    backgroundColor: colors.textPrimary,
+                    iconColor: colors.background,
                     size: 80,
-                    enabled: hobbyState.selectedHobby != null || !isIdle,
                   ),
                 ],
               ),
@@ -357,7 +369,6 @@ class _ControlButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: backgroundColor,
             shape: BoxShape.circle,
-            border: Border.all(color: AppColors.border),
           ),
           child: Icon(
             icon,
@@ -385,37 +396,83 @@ class _HobbySelectorSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: colors.separator,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
+
+              Text(
+                '취미 선택',
+                style: typography.title3,
+              ),
+              const SizedBox(height: 16),
+
+              // Hobby list
+              ...hobbies.map((hobby) => _HobbyTile(
+                    hobby: hobby,
+                    isSelected: selectedHobby?.id == hobby.id,
+                    onTap: () => onSelect(hobby),
+                  )),
+
+              const SizedBox(height: 8),
+
+              // Add new hobby
+              GestureDetector(
+                onTap: onAddNew,
+                child: Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colors.separatorOpaque,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add,
+                        color: colors.textTertiary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        '새 취미 추가',
+                        style: typography.body.copyWith(
+                          color: colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          Text(
-            '취미 선택',
-            style: AppTextStyles.h4.copyWith(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 20),
-          ...hobbies.map((hobby) => _HobbyTile(
-                hobby: hobby,
-                isSelected: selectedHobby?.id == hobby.id,
-                onTap: () => onSelect(hobby),
-              )),
-          const SizedBox(height: 8),
-          _AddHobbyTile(onTap: onAddNew),
-          SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
-        ],
+        ),
       ),
     );
   }
@@ -434,16 +491,20 @@ class _HobbyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.surfaceVariant : Colors.transparent,
+          color: isSelected ? colors.surfaceSecondary : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.textTertiary : AppColors.border,
+            color: isSelected ? colors.textTertiary : colors.separatorOpaque,
           ),
         ),
         child: Row(
@@ -452,15 +513,15 @@ class _HobbyTile extends StatelessWidget {
               width: 8,
               height: 8,
               decoration: BoxDecoration(
-                color: AppColors.timerRunning,
+                color: colors.timerRunning,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 hobby.name,
-                style: AppTextStyles.bodyLarge.copyWith(
+                style: typography.body.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -468,48 +529,9 @@ class _HobbyTile extends StatelessWidget {
             if (isSelected)
               Icon(
                 Icons.check,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 size: 20,
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AddHobbyTile extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _AddHobbyTile({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.border,
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.add,
-              color: AppColors.textTertiary,
-              size: 20,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              '새 취미 추가',
-              style: AppTextStyles.bodyLarge.copyWith(
-                color: AppColors.textTertiary,
-              ),
-            ),
           ],
         ),
       ),

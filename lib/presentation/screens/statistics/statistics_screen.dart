@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import '../../../data/models/models.dart';
 import '../../providers/providers.dart';
 import '../../widgets/widgets.dart';
 
+@RoutePage()
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
@@ -29,49 +31,44 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(statisticsProvider);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Row(
-                children: [
-                  const AppLogoIcon(size: 44),
-                  const SizedBox(width: 12),
-                  Text(
-                    '통계',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Text(
+                '통계',
+                style: typography.largeTitle,
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Tab selector
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  _TabChip(
+                  AppChip(
                     label: '오늘',
                     isSelected: _selectedTabIndex == 0,
                     onTap: () => setState(() => _selectedTabIndex = 0),
                   ),
-                  const SizedBox(width: 12),
-                  _TabChip(
+                  const SizedBox(width: 8),
+                  AppChip(
                     label: '이번 주',
                     isSelected: _selectedTabIndex == 1,
                     onTap: () => setState(() => _selectedTabIndex = 1),
                   ),
-                  const SizedBox(width: 12),
-                  _TabChip(
+                  const SizedBox(width: 8),
+                  AppChip(
                     label: '이번 달',
                     isSelected: _selectedTabIndex == 2,
                     onTap: () => setState(() => _selectedTabIndex = 2),
@@ -80,7 +77,7 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Content
             Expanded(
@@ -104,84 +101,74 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
       );
     }
 
-    if (state.statistics == null) {
-      return _EmptyStatisticsView();
+    // 데이터가 하나도 없을 때
+    final hasNoData = state.today == null &&
+                      state.weekly == null &&
+                      state.monthly == null &&
+                      state.hobbyStats.isEmpty;
+
+    if (hasNoData) {
+      return const _EmptyStatisticsView();
     }
 
     return IndexedStack(
       index: _selectedTabIndex,
       children: [
-        _DailyStatisticsView(statistics: state.statistics!),
-        _WeeklyStatisticsView(statistics: state.statistics!),
-        _MonthlyStatisticsView(statistics: state.statistics!),
+        _DailyStatisticsView(
+          today: state.today,
+          hobbyStats: state.hobbyStats,
+          streak: state.streak,
+        ),
+        _WeeklyStatisticsView(
+          weekly: state.weekly,
+          hobbyStats: state.hobbyStats,
+        ),
+        _MonthlyStatisticsView(
+          monthly: state.monthly,
+          hobbyStats: state.hobbyStats,
+        ),
       ],
     );
   }
 }
 
-class _TabChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _TabChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyles.labelMedium.copyWith(
-            color: isSelected ? AppColors.background : AppColors.textSecondary,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyStatisticsView extends StatelessWidget {
+  const _EmptyStatisticsView();
+
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.border),
+              color: colors.surfaceSecondary,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               Icons.bar_chart_outlined,
-              size: 36,
-              color: AppColors.textTertiary,
+              size: 28,
+              color: colors.textTertiary,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Text(
-            '통계 데이터가 없습니다',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textTertiary,
+            '아직 기록이 없습니다',
+            style: typography.body.copyWith(
+              color: colors.textTertiary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '타이머로 활동을 기록해보세요',
+            style: typography.footnote.copyWith(
+              color: colors.textTertiary,
             ),
           ),
         ],
@@ -191,26 +178,34 @@ class _EmptyStatisticsView extends StatelessWidget {
 }
 
 class _DailyStatisticsView extends StatelessWidget {
-  final UserStatistics statistics;
+  final DailyStatisticsResponse? today;
+  final List<HobbyStatisticsResponse> hobbyStats;
+  final StreakResponse? streak;
 
-  const _DailyStatisticsView({required this.statistics});
+  const _DailyStatisticsView({
+    required this.today,
+    required this.hobbyStats,
+    this.streak,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final daily = statistics.daily;
-
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: daily.totalDurationSeconds,
-            recordCount: daily.recordCount,
+            totalSeconds: today?.totalDurationSeconds ?? 0,
+            recordCount: today?.recordCount ?? 0,
             label: '오늘',
           ),
-          const SizedBox(height: 24),
-          if (statistics.hobbyStats.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
+          if (streak != null && streak!.currentStreak > 0) ...[
+            const SizedBox(height: 16),
+            _StreakCard(streak: streak!),
+          ],
+          const SizedBox(height: 20),
+          if (hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: hobbyStats),
           const SizedBox(height: 24),
         ],
       ),
@@ -219,26 +214,32 @@ class _DailyStatisticsView extends StatelessWidget {
 }
 
 class _WeeklyStatisticsView extends StatelessWidget {
-  final UserStatistics statistics;
+  final WeeklyStatisticsResponse? weekly;
+  final List<HobbyStatisticsResponse> hobbyStats;
 
-  const _WeeklyStatisticsView({required this.statistics});
+  const _WeeklyStatisticsView({
+    required this.weekly,
+    required this.hobbyStats,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final weekly = statistics.weekly;
-
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: weekly.totalDurationSeconds,
-            recordCount: weekly.recordCount,
+            totalSeconds: weekly?.totalDurationSeconds ?? 0,
+            recordCount: weekly?.recordCount ?? 0,
             label: '이번 주',
           ),
-          const SizedBox(height: 24),
-          if (statistics.hobbyStats.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
+          if (weekly != null && weekly!.dailyStatistics.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _WeeklyChartCard(dailyStats: weekly!.dailyStatistics),
+          ],
+          const SizedBox(height: 20),
+          if (hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: hobbyStats),
           const SizedBox(height: 24),
         ],
       ),
@@ -247,26 +248,32 @@ class _WeeklyStatisticsView extends StatelessWidget {
 }
 
 class _MonthlyStatisticsView extends StatelessWidget {
-  final UserStatistics statistics;
+  final MonthlyStatisticsResponse? monthly;
+  final List<HobbyStatisticsResponse> hobbyStats;
 
-  const _MonthlyStatisticsView({required this.statistics});
+  const _MonthlyStatisticsView({
+    required this.monthly,
+    required this.hobbyStats,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final monthly = statistics.monthly;
+    final label = monthly?.yearMonth != null
+        ? '${monthly!.yearMonth.split('-')[1]}월'
+        : '이번 달';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           _SummaryCard(
-            totalSeconds: monthly.totalDurationSeconds,
-            recordCount: monthly.recordCount,
-            label: '${monthly.month}월',
+            totalSeconds: monthly?.totalDurationSeconds ?? 0,
+            recordCount: monthly?.recordCount ?? 0,
+            label: label,
           ),
-          const SizedBox(height: 24),
-          if (statistics.hobbyStats.isNotEmpty)
-            _HobbyBreakdownCard(hobbies: statistics.hobbyStats),
+          const SizedBox(height: 20),
+          if (hobbyStats.isNotEmpty)
+            _HobbyBreakdownCard(hobbies: hobbyStats),
           const SizedBox(height: 24),
         ],
       ),
@@ -287,61 +294,198 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
+          // Period label
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(20),
+              color: colors.surfaceSecondary,
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               label,
-              style: AppTextStyles.labelMedium.copyWith(
-                color: AppColors.textSecondary,
+              style: typography.footnote.copyWith(
+                color: colors.textSecondary,
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+
+          // Total duration
           Text(
             DurationFormatter.formatHumanReadable(
               Duration(seconds: totalSeconds),
             ),
             style: TextStyle(
-              fontSize: 40,
+              fontSize: 36,
               fontWeight: FontWeight.w300,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               letterSpacing: 1,
+              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+
+          // Record count
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: 6,
+                height: 6,
                 decoration: BoxDecoration(
-                  color: AppColors.timerRunning,
+                  color: colors.timerRunning,
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 '$recordCount개의 기록',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.textTertiary,
+                style: typography.subhead.copyWith(
+                  color: colors.textTertiary,
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StreakCard extends StatelessWidget {
+  final StreakResponse streak;
+
+  const _StreakCard({required this.streak});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: colors.timerRunning.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.local_fire_department_rounded,
+              color: colors.timerRunning,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${streak.currentStreak}일 연속 기록 중',
+                  style: typography.headline,
+                ),
+                Text(
+                  '최장 기록: ${streak.longestStreak}일',
+                  style: typography.footnote.copyWith(
+                    color: colors.textTertiary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WeeklyChartCard extends StatelessWidget {
+  final List<DailyStatisticsResponse> dailyStats;
+
+  const _WeeklyChartCard({required this.dailyStats});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    // 최대 시간 계산 (최소 1시간 = 3600초)
+    final maxSeconds = dailyStats.fold<int>(
+      3600,
+      (max, stat) => stat.totalDurationSeconds > max ? stat.totalDurationSeconds : max,
+    );
+
+    final weekDays = ['월', '화', '수', '목', '금', '토', '일'];
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '일별 활동',
+            style: typography.headline,
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 120,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(7, (index) {
+                final stat = index < dailyStats.length ? dailyStats[index] : null;
+                final seconds = stat?.totalDurationSeconds ?? 0;
+                final height = maxSeconds > 0 ? (seconds / maxSeconds) * 80 : 0.0;
+
+                return Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        height: height.clamp(4.0, 80.0),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: seconds > 0 ? colors.textPrimary : colors.surfaceSecondary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        weekDays[index],
+                        style: typography.caption2.copyWith(
+                          color: colors.textTertiary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ),
           ),
         ],
       ),
@@ -350,31 +494,49 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _HobbyBreakdownCard extends StatelessWidget {
-  final List<HobbyStatistics> hobbies;
+  final List<HobbyStatisticsResponse> hobbies;
 
   const _HobbyBreakdownCard({required this.hobbies});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    // 총 시간 계산
+    final totalSeconds = hobbies.fold<int>(
+      0,
+      (sum, hobby) => sum + hobby.totalDurationSeconds,
+    );
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '취미별 활동',
-            style: AppTextStyles.h4.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+            '취미별 누적 시간',
+            style: typography.headline,
           ),
-          const SizedBox(height: 20),
-          ...hobbies.map((hobby) => _HobbyStatItem(hobby: hobby)),
+          const SizedBox(height: 16),
+          ...hobbies.asMap().entries.map((entry) {
+            final index = entry.key;
+            final hobby = entry.value;
+            final isLast = index == hobbies.length - 1;
+            final percentage = totalSeconds > 0
+                ? (hobby.totalDurationSeconds / totalSeconds * 100)
+                : 0.0;
+            return _HobbyStatItem(
+              hobby: hobby,
+              percentage: percentage,
+              showDivider: !isLast,
+            );
+          }),
         ],
       ),
     );
@@ -382,61 +544,77 @@ class _HobbyBreakdownCard extends StatelessWidget {
 }
 
 class _HobbyStatItem extends StatelessWidget {
-  final HobbyStatistics hobby;
+  final HobbyStatisticsResponse hobby;
+  final double percentage;
+  final bool showDivider;
 
-  const _HobbyStatItem({required this.hobby});
+  const _HobbyStatItem({
+    required this.hobby,
+    required this.percentage,
+    this.showDivider = true,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.timerRunning,
-                      shape: BoxShape.circle,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: colors.timerRunning,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        hobby.hobbyName,
+                        style: typography.body,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
                   Text(
-                    hobby.hobbyName,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      fontWeight: FontWeight.w500,
+                    DurationFormatter.formatHumanReadable(
+                      Duration(seconds: hobby.totalDurationSeconds),
+                    ),
+                    style: typography.subhead.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
               ),
-              Text(
-                DurationFormatter.formatHumanReadable(
-                  Duration(seconds: hobby.totalDurationSeconds),
-                ),
-                style: AppTextStyles.labelMedium.copyWith(
-                  color: AppColors.textSecondary,
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: LinearProgressIndicator(
+                  value: percentage / 100,
+                  backgroundColor: colors.surfaceSecondary,
+                  valueColor: AlwaysStoppedAnimation<Color>(colors.textPrimary),
+                  minHeight: 4,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: hobby.percentage / 100,
-              backgroundColor: AppColors.surfaceVariant,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
-              minHeight: 6,
-            ),
+        ),
+        if (showDivider)
+          Container(
+            height: 0.5,
+            color: colors.separatorOpaque,
           ),
-        ],
-      ),
+      ],
     );
   }
 }

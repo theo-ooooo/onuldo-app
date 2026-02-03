@@ -1,12 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/providers.dart';
 import '../../widgets/widgets.dart';
 import '../../router/app_router.dart';
 
+@RoutePage()
 class UserSearchScreen extends ConsumerStatefulWidget {
   const UserSearchScreen({super.key});
 
@@ -21,9 +22,6 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
   }
 
   @override
@@ -40,75 +38,52 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(userSearchProvider);
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.pop(),
-                    child: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: AppColors.textPrimary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    '사용자 검색',
-                    style: AppTextStyles.h3.copyWith(
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Text(
+                '검색',
+                style: typography.largeTitle,
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
             // Search field
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: colors.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
                 ),
                 child: TextField(
                   controller: _searchController,
                   focusNode: _focusNode,
-                  style: AppTextStyles.bodyLarge,
+                  style: typography.body,
                   onChanged: _onSearch,
                   decoration: InputDecoration(
                     hintText: '닉네임 또는 이메일로 검색',
-                    hintStyle: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textTertiary,
+                    hintStyle: typography.body.copyWith(
+                      color: colors.textTertiary,
                     ),
                     prefixIcon: Icon(
                       Icons.search,
-                      color: AppColors.textTertiary,
+                      color: colors.textTertiary,
                     ),
                     suffixIcon: searchState.query.isNotEmpty
                         ? IconButton(
                             icon: Icon(
                               Icons.clear,
-                              color: AppColors.textTertiary,
+                              color: colors.textTertiary,
                             ),
                             onPressed: () {
                               _searchController.clear();
@@ -139,6 +114,9 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
   }
 
   Widget _buildBody(UserSearchState state) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     if (state.query.isEmpty) {
       return Center(
         child: Column(
@@ -148,21 +126,20 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.border),
               ),
               child: Icon(
                 Icons.person_search_outlined,
                 size: 36,
-                color: AppColors.textTertiary,
+                color: colors.textTertiary,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Text(
               '사용자를 검색해보세요',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textTertiary,
+              style: typography.subhead.copyWith(
+                color: colors.textTertiary,
               ),
             ),
           ],
@@ -190,21 +167,20 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.border),
               ),
               child: Icon(
                 Icons.search_off_outlined,
                 size: 36,
-                color: AppColors.textTertiary,
+                color: colors.textTertiary,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Text(
               '검색 결과가 없습니다',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textTertiary,
+              style: typography.subhead.copyWith(
+                color: colors.textTertiary,
               ),
             ),
           ],
@@ -212,15 +188,20 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       itemCount: state.users.length,
+      separatorBuilder: (context, index) => Divider(
+        height: 1,
+        color: colors.separatorOpaque,
+        indent: 68,
+      ),
       itemBuilder: (context, index) {
         final user = state.users[index];
         return _UserTile(
           user: user,
           onTap: () {
-            context.push('${AppRoutes.userProfile}/${user.userId}');
+            context.router.push(UserProfileRoute(userId: user.userId));
           },
         );
       },
@@ -239,24 +220,22 @@ class _UserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(14),
+                color: colors.surfaceSecondary,
+                borderRadius: BorderRadius.circular(12),
                 image: user.profileImageUrl != null
                     ? DecorationImage(
                         image: NetworkImage(user.profileImageUrl!),
@@ -269,30 +248,30 @@ class _UserTile extends StatelessWidget {
                       child: Text(
                         user.nickname[0].toUpperCase(),
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     )
                   : null,
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     user.nickname,
-                    style: AppTextStyles.bodyLarge.copyWith(
+                    style: typography.body.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     user.email,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textTertiary,
+                    style: typography.footnote.copyWith(
+                      color: colors.textTertiary,
                     ),
                   ),
                 ],
@@ -300,7 +279,8 @@ class _UserTile extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textTertiary,
+              color: colors.textTertiary,
+              size: 20,
             ),
           ],
         ),
