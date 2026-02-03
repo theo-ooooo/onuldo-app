@@ -1,12 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/widgets.dart';
 import '../../router/app_router.dart';
 
+@RoutePage()
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -38,7 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
 
     if (success) {
-      context.go(AppRoutes.timer);
+      context.router.navigate(const TimerRoute());
     } else {
       final error = ref.read(authProvider).error;
       if (error != null) {
@@ -53,8 +54,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isLoading = authState.status == AuthStatus.loading;
+    final colors = context.colors;
+    final typography = context.typography;
 
     return Scaffold(
+      backgroundColor: colors.background,
       body: LoadingOverlay(
         isLoading: isLoading,
         child: SafeArea(
@@ -77,10 +81,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Center(
                     child: Text(
                       '오늘도',
-                      style: TextStyle(
-                        fontSize: 28,
+                      style: typography.title1.copyWith(
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textPrimary,
                         letterSpacing: 6,
                       ),
                     ),
@@ -91,15 +93,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Welcome text
                   Text(
                     '반갑습니다',
-                    style: AppTextStyles.h2.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: typography.title2,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     '로그인하고 오늘의 취미를 기록하세요',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textTertiary,
+                    style: typography.body.copyWith(
+                      color: colors.textTertiary,
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -107,8 +107,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Email field
                   Text(
                     '이메일',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
+                    style: typography.footnote.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -116,11 +116,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    style: AppTextStyles.bodyLarge,
+                    style: typography.body,
                     decoration: InputDecoration(
                       hintText: 'email@example.com',
-                      hintStyle: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textTertiary,
+                      hintStyle: typography.body.copyWith(
+                        color: colors.textTertiary,
                       ),
                     ),
                     validator: (value) {
@@ -138,8 +138,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Password field
                   Text(
                     '비밀번호',
-                    style: AppTextStyles.labelMedium.copyWith(
-                      color: AppColors.textSecondary,
+                    style: typography.footnote.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -148,18 +148,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     obscureText: _obscurePassword,
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (_) => _login(),
-                    style: AppTextStyles.bodyLarge,
+                    style: typography.body,
                     decoration: InputDecoration(
                       hintText: '••••••••',
-                      hintStyle: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.textTertiary,
+                      hintStyle: typography.body.copyWith(
+                        color: colors.textTertiary,
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: AppColors.textTertiary,
+                          color: colors.textTertiary,
                           size: 20,
                         ),
                         onPressed: () {
@@ -187,18 +187,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _login,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF18181B),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
                       child: Text(
                         '로그인',
-                        style: AppTextStyles.button.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                        style: typography.headline.copyWith(
+                          color: colors.background,
                         ),
                       ),
                     ),
@@ -211,19 +203,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     children: [
                       Text(
                         '계정이 없으신가요?',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: AppColors.textTertiary,
+                        style: typography.body.copyWith(
+                          color: colors.textTertiary,
                         ),
                       ),
                       TextButton(
-                        onPressed: () => context.go(AppRoutes.signup),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.textPrimary,
-                        ),
-                        child: const Text(
+                        onPressed: () => context.router.push(const SignupRoute()),
+                        child: Text(
                           '회원가입',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
+                          style: typography.headline.copyWith(
+                            color: colors.textPrimary,
                             decoration: TextDecoration.underline,
                           ),
                         ),
