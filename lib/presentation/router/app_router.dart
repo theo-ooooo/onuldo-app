@@ -1,6 +1,6 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 import '../screens/splash/splash_screen.dart';
@@ -15,114 +15,77 @@ import '../screens/record/create_record_screen.dart';
 import '../screens/user/user_search_screen.dart';
 import '../screens/user/user_profile_screen.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorKey = GlobalKey<NavigatorState>();
+part 'app_router.gr.dart';
 
-final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+// Auth guard - 회원가입 페이지에서는 리다이렉트하지 않음
+class _SignupGuard extends AutoRouteGuard {
+  @override
+  void onNavigation(NavigationResolver resolver, StackRouter router) {
+    // 회원가입 페이지에서는 항상 허용
+    resolver.next();
+  }
+}
 
-  return GoRouter(
-    navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
-    debugLogDiagnostics: true,
-    redirect: (context, state) {
-      final isLoggedIn = authState.status == AuthStatus.authenticated;
-      final isLoading = authState.status == AuthStatus.loading ||
-          authState.status == AuthStatus.initial;
-      final isSplash = state.matchedLocation == '/splash';
-      final isAuthRoute = state.matchedLocation == '/login' ||
-          state.matchedLocation == '/signup';
+@AutoRouterConfig()
+class AppRouter extends RootStackRouter {
+  @override
+  List<AutoRoute> get routes => [
+    AutoRoute(
+      page: SplashRoute.page,
+      path: '/splash',
+      initial: true,
+    ),
+    AutoRoute(
+      page: LoginRoute.page,
+      path: '/login',
+    ),
+    AutoRoute(
+      page: SignupRoute.page,
+      path: '/signup',
+      guards: [_SignupGuard()],
+    ),
+    AutoRoute(
+      page: CreateRecordRoute.page,
+      path: '/create-record',
+    ),
+    AutoRoute(
+      page: UserSearchRoute.page,
+      path: '/search',
+    ),
+    AutoRoute(
+      page: UserProfileRoute.page,
+      path: '/user/:userId',
+    ),
+    // Shell route for bottom navigation
+    AutoRoute(
+      page: HomeRoute.page,
+      path: '/',
+      children: [
+        AutoRoute(
+          page: TimerRoute.page,
+          path: 'timer',
+        ),
+        AutoRoute(
+          page: FeedRoute.page,
+          path: 'feed',
+        ),
+        AutoRoute(
+          page: StatisticsRoute.page,
+          path: 'statistics',
+        ),
+        AutoRoute(
+          page: ProfileRoute.page,
+          path: 'profile',
+        ),
+      ],
+    ),
+  ];
+}
 
-      // Show splash while loading
-      if (isLoading && isSplash) {
-        return null;
-      }
-
-      // After loading, redirect based on auth status
-      if (!isLoading && isSplash) {
-        return isLoggedIn ? '/timer' : '/login';
-      }
-
-      // Redirect to login if not authenticated
-      if (!isLoggedIn && !isAuthRoute && !isSplash) {
-        return '/login';
-      }
-
-      // Redirect to home if authenticated and trying to access auth routes
-      if (isLoggedIn && isAuthRoute) {
-        return '/timer';
-      }
-
-      return null;
-    },
-    routes: [
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashScreen(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: '/signup',
-        builder: (context, state) => const SignupScreen(),
-      ),
-      ShellRoute(
-        navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) => HomeScreen(child: child),
-        routes: [
-          GoRoute(
-            path: '/timer',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: TimerScreen(),
-            ),
-          ),
-          GoRoute(
-            path: '/feed',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: FeedScreen(),
-            ),
-          ),
-          GoRoute(
-            path: '/statistics',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: StatisticsScreen(),
-            ),
-          ),
-          GoRoute(
-            path: '/profile',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: ProfileScreen(),
-            ),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/create-record',
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return CreateRecordScreen(
-            timerId: extra?['timerId'] as int?,
-            hobbyId: extra?['hobbyId'] as int?,
-            hobbyName: extra?['hobbyName'] as String?,
-            durationSeconds: extra?['durationSeconds'] as int?,
-          );
-        },
-      ),
-      GoRoute(
-        path: '/user-search',
-        builder: (context, state) => const UserSearchScreen(),
-      ),
-      GoRoute(
-        path: '/user/:userId',
-        builder: (context, state) {
-          final userId = int.parse(state.pathParameters['userId']!);
-          return UserProfileScreen(userId: userId);
-        },
-      ),
-    ],
-  );
+// Router provider with auth guard
+final routerProvider = Provider<AppRouter>((ref) {
+  final router = AppRouter();
+  return router;
 });
 
 class AppRoutes {
@@ -134,8 +97,9 @@ class AppRoutes {
   static const timer = '/timer';
   static const feed = '/feed';
   static const statistics = '/statistics';
+  static const search = '/search';
   static const profile = '/profile';
   static const createRecord = '/create-record';
-  static const userSearch = '/user-search';
+  static const userSearch = '/search';
   static const userProfile = '/user';
 }
