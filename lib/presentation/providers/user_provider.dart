@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../data/repositories/follow_repository.dart';
+import '../../data/repositories/feed_repository.dart';
 
 part 'user_provider.freezed.dart';
 
