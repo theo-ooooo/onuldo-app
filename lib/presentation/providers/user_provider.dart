@@ -88,10 +88,30 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
     }
   }
 
-  Future<void> loadFollowers(int userId) async {
+  Future<void> loadFollowers(int userId, {int? myUserId}) async {
     try {
       final followers = await _followRepository.getFollowers(userId);
-      state = state.copyWith(followers: followers);
+
+      // 타인 프로필일 때: 내가 그 사람을 팔로우 중인지 판단
+      // (내 userId가 해당 유저의 followers 목록에 포함되면 = 내가 팔로잉 중)
+      var resolvedMyUserId = myUserId;
+      // 앱 재시작 후에는 authProvider.user가 null일 수 있어 /me로 보강
+      if (resolvedMyUserId == null) {
+        try {
+          final me = await _userRepository.getMyInfo();
+          resolvedMyUserId = me.userId;
+        } catch (_) {
+          // ignore
+        }
+      }
+
+      final isFollowing = resolvedMyUserId != null &&
+          followers.any((follower) => follower.userId == resolvedMyUserId);
+
+      state = state.copyWith(
+        followers: followers,
+        isFollowing: isFollowing,
+      );
     } catch (e) {
       // Silently fail
     }
@@ -117,6 +137,8 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
           isFollowing: true,
         );
       }
+      // 팔로워 리스트 즉시 갱신 (내가 팔로워 목록에 추가되도록)
+      await loadFollowers(userId);
       return true;
     } catch (e) {
       state = state.copyWith(error: e.toString());
@@ -135,6 +157,8 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
           isFollowing: false,
         );
       }
+      // 팔로워 리스트 즉시 갱신 (내가 팔로워 목록에서 제거되도록)
+      await loadFollowers(userId);
       return true;
     } catch (e) {
       state = state.copyWith(error: e.toString());

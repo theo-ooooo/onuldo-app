@@ -29,8 +29,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     _tabController = TabController(length: 2, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final myUserId = ref.read(authProvider).user?.id;
       ref.read(userProfileProvider.notifier).loadUser(widget.userId);
-      ref.read(userProfileProvider.notifier).loadFollowers(widget.userId);
+      ref
+          .read(userProfileProvider.notifier)
+          .loadFollowers(widget.userId, myUserId: myUserId);
       ref.read(userProfileProvider.notifier).loadFollowing(widget.userId);
     });
   }
@@ -38,7 +41,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    ref.read(userProfileProvider.notifier).clear();
+    // dispose 후에는 ref를 사용할 수 없으므로 clear는 제거
+    // 필요시 provider의 자동 정리 기능을 사용하거나
+    // 다른 생명주기에서 처리
     super.dispose();
   }
 

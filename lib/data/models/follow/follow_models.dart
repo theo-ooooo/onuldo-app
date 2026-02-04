@@ -9,7 +9,7 @@ class FollowUserResponse with _$FollowUserResponse {
     required int userId,
     required String nickname,
     String? profileImageUrl,
-    required bool isFollowing,
+    @JsonKey(name: 'following') required bool isFollowing,
   }) = _FollowUserResponse;
 
   factory FollowUserResponse.fromJson(Map<String, dynamic> json) =>
