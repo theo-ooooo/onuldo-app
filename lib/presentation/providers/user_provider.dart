@@ -63,6 +63,9 @@ class UserProfileState with _$UserProfileState {
     @Default(false) bool isFollowing,
     @Default([]) List<FollowUserResponse> followers,
     @Default([]) List<FollowUserResponse> following,
+    @Default([]) List<FeedItemResponse> feedItems,
+    @Default(false) bool isFeedLoading,
+    String? feedError,
   }) = _UserProfileState;
 }
 
@@ -70,8 +73,9 @@ class UserProfileState with _$UserProfileState {
 class UserProfileNotifier extends StateNotifier<UserProfileState> {
   final UserRepository _userRepository;
   final FollowRepository _followRepository;
+  final FeedRepository _feedRepository;
 
-  UserProfileNotifier(this._userRepository, this._followRepository)
+  UserProfileNotifier(this._userRepository, this._followRepository, this._feedRepository)
       : super(const UserProfileState());
 
   Future<void> loadUser(int userId) async {
@@ -123,6 +127,16 @@ class UserProfileNotifier extends StateNotifier<UserProfileState> {
       state = state.copyWith(following: following);
     } catch (e) {
       // Silently fail
+    }
+  }
+
+  Future<void> loadUserFeed(int userId) async {
+    state = state.copyWith(isFeedLoading: true, feedError: null);
+    try {
+      final feed = await _feedRepository.getUserFeed(userId);
+      state = state.copyWith(feedItems: feed, isFeedLoading: false);
+    } catch (e) {
+      state = state.copyWith(isFeedLoading: false, feedError: e.toString());
     }
   }
 
@@ -180,6 +194,7 @@ final userProfileProvider =
   return UserProfileNotifier(
     ref.read(userRepositoryProvider),
     ref.read(followRepositoryProvider),
+    ref.read(feedRepositoryProvider),
   );
 });
 

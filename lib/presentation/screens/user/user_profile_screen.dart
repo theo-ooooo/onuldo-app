@@ -26,7 +26,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final myUserId = ref.read(authProvider).user?.id;
@@ -35,6 +35,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           .read(userProfileProvider.notifier)
           .loadFollowers(widget.userId, myUserId: myUserId);
       ref.read(userProfileProvider.notifier).loadFollowing(widget.userId);
+      ref.read(userProfileProvider.notifier).loadUserFeed(widget.userId);
     });
   }
 
@@ -249,6 +250,15 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   setState(() {});
                 },
               ),
+              const SizedBox(width: 8),
+              _TabButton(
+                label: '피드 ${state.feedItems.length}',
+                isSelected: _tabController.index == 2,
+                onTap: () {
+                  _tabController.animateTo(2);
+                  setState(() {});
+                },
+              ),
             ],
           ),
         ),
@@ -262,10 +272,153 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             children: [
               _FollowList(users: state.followers),
               _FollowList(users: state.following),
+              _UserFeedList(
+                items: state.feedItems,
+                isLoading: state.isFeedLoading,
+                error: state.feedError,
+                onRetry: () => ref
+                    .read(userProfileProvider.notifier)
+                    .loadUserFeed(widget.userId),
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _UserFeedList extends StatelessWidget {
+  final List<FeedItemResponse> items;
+  final bool isLoading;
+  final String? error;
+  final VoidCallback onRetry;
+
+  const _UserFeedList({
+    required this.items,
+    required this.isLoading,
+    required this.error,
+    required this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    if (isLoading) {
+      return const Center(child: LoadingIndicator(size: 48));
+    }
+    if (error != null) {
+      return ErrorView(message: error!, onRetry: onRetry);
+    }
+    if (items.isEmpty) {
+      return Center(
+        child: Text(
+          '아직 공개된 기록이 없습니다',
+          style: typography.body.copyWith(color: colors.textSecondary),
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+      itemCount: items.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: colors.separatorOpaque),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: colors.surfaceSecondary,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      item.hobbyName,
+                      style: typography.caption1.copyWith(
+                        color: colors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    item.activityDate,
+                    style: typography.caption2.copyWith(
+                      color: colors.textTertiary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              if (item.memo != null && item.memo!.trim().isNotEmpty)
+                Text(
+                  item.memo!,
+                  style: typography.body.copyWith(
+                    color: colors.textPrimary,
+                    height: 1.4,
+                  ),
+                )
+              else
+                Text(
+                  '메모 없음',
+                  style: typography.body.copyWith(
+                    color: colors.textTertiary,
+                  ),
+                ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(Icons.timer_outlined, size: 16, color: colors.textTertiary),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${(item.durationSeconds / 60).round()}분',
+                    style: typography.footnote.copyWith(
+                      color: colors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.favorite_border,
+                      size: 16, color: colors.textTertiary),
+                  const SizedBox(width: 6),
+                  Text(
+                    item.totalReactionCount.toString(),
+                    style: typography.footnote.copyWith(
+                      color: colors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Icon(Icons.chat_bubble_outline,
+                      size: 16, color: colors.textTertiary),
+                  const SizedBox(width: 6),
+                  Text(
+                    item.commentCount.toString(),
+                    style: typography.footnote.copyWith(
+                      color: colors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
