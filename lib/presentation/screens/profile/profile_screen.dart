@@ -301,6 +301,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 children: [
                   myInfoAsync.when(
                     data: (user) => _ProfileTile(
+                      userId: user.userId,
                       nickname: user.nickname,
                       email: user.email,
                       profileImageUrl: user.profileImageUrl,
@@ -311,6 +312,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       child: Center(child: LoadingIndicator(size: 24)),
                     ),
                     error: (error, stack) => _ProfileTile(
+                      userId: null,
                       nickname: '사용자',
                       email: '',
                     ),
@@ -488,12 +490,14 @@ class _NotificationIconButton extends StatelessWidget {
 }
 
 class _ProfileTile extends StatelessWidget {
+  final int? userId;
   final String nickname;
   final String email;
   final String? profileImageUrl;
   final String? bio;
 
   const _ProfileTile({
+    this.userId,
     required this.nickname,
     required this.email,
     this.profileImageUrl,
@@ -505,9 +509,15 @@ class _ProfileTile extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typography;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
+    return GestureDetector(
+      onTap: userId != null
+          ? () {
+              context.router.push(UserProfileRoute(userId: userId!));
+            }
+          : null,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Row(
         children: [
           // Avatar
           Container(
@@ -568,6 +578,7 @@ class _ProfileTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
