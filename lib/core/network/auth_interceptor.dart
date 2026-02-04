@@ -8,6 +8,10 @@ class AuthInterceptor extends QueuedInterceptor {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
 
+  /// 토큰 만료 후 재발급까지 실패했을 때 호출되는 콜백
+  /// (예: 전역에서 강제 로그아웃 + 로그인 페이지 이동)
+  static Future<void> Function()? onTokenExpired;
+
   AuthInterceptor(this._storage, this._dio);
 
   @override
@@ -30,7 +34,9 @@ class AuthInterceptor extends QueuedInterceptor {
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401) {
+    // 인증 관련 엔드포인트 자체의 401은 건너뜀 (무한 루프 방지)
+    if (err.response?.statusCode == 401 &&
+        !_isAuthEndpoint(err.requestOptions.path)) {
       // Token expired, try to refresh
       final refreshToken = await _storage.read(key: _refreshTokenKey);
       if (refreshToken != null) {
@@ -55,10 +61,12 @@ class AuthInterceptor extends QueuedInterceptor {
             return handler.resolve(retryResponse);
           }
         } catch (e) {
-          // Refresh failed, clear tokens
-          await _storage.delete(key: _accessTokenKey);
-          await _storage.delete(key: _refreshTokenKey);
+          // Refresh failed
+          await _handleTokenExpired();
         }
+      } else {
+        // refreshToken 자체가 없으면 바로 만료 처리
+        await _handleTokenExpired();
       }
     }
 
@@ -69,6 +77,18 @@ class AuthInterceptor extends QueuedInterceptor {
     return path.contains('/auth/login') ||
            path.contains('/auth/signup') ||
            path.contains('/auth/refresh');
+  }
+
+  Future<void> _handleTokenExpired() async {
+    // 토큰 삭제
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+
+    // 전역 콜백 호출 (예: 로그아웃 + 로그인 페이지 이동)
+    final callback = AuthInterceptor.onTokenExpired;
+    if (callback != null) {
+      await callback();
+    }
   }
 
   // Helper methods to manage tokens

@@ -3,10 +3,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/network/auth_interceptor.dart';
 import 'data/repositories/user_repository.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/router/app_router.dart';
+import 'presentation/router/app_router.gr.dart';
 import 'shared/theme/app_theme.dart';
 
 class OnuldoApp extends ConsumerStatefulWidget {
@@ -21,6 +23,16 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // 토큰 만료(401 + 재발급 실패) 시 전역 강제 로그아웃 + 로그인 페이지 이동
+    AuthInterceptor.onTokenExpired = () async {
+      // auth 상태를 unauthenticated로 변경
+      await ref.read(authProvider.notifier).logout();
+
+      // 로그인 페이지로 이동 (전체 스택 교체)
+      final router = ref.read(routerProvider);
+      router.replaceAll([const LoginRoute()]);
+    };
   }
 
   @override
