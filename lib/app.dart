@@ -8,7 +8,6 @@ import 'data/repositories/user_repository.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/router/app_router.dart';
-import 'presentation/router/app_router.gr.dart';
 import 'shared/theme/app_theme.dart';
 
 class OnuldoApp extends ConsumerStatefulWidget {
