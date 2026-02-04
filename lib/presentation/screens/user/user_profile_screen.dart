@@ -54,7 +54,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   Widget build(BuildContext context) {
     final state = ref.watch(userProfileProvider);
     final authState = ref.watch(authProvider);
-    final isMyProfile = authState.user?.id == widget.userId;
+    final myInfoAsync = ref.watch(myInfoProvider);
+    final resolvedMyUserId =
+        authState.user?.id ?? myInfoAsync.maybeWhen(data: (u) => u.userId, orElse: () => null);
+    // 내 userId를 확실히 알기 전에는 팔로우 버튼을 숨김(자기 자신 팔로우 방지)
+    final canDetermineMyUserId = resolvedMyUserId != null;
+    final isMyProfile =
+        canDetermineMyUserId && resolvedMyUserId == widget.userId;
     final colors = context.colors;
     final typography = context.typography;
 
@@ -79,12 +85,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           ),
                         ),
                       )
-                    : _buildContent(state, isMyProfile),
+                    : _buildContent(
+                        state,
+                        isMyProfile: isMyProfile,
+                        showFollowButton: canDetermineMyUserId && !isMyProfile,
+                      ),
       ),
     );
   }
 
-  Widget _buildContent(UserProfileState state, bool isMyProfile) {
+  Widget _buildContent(
+    UserProfileState state, {
+    required bool isMyProfile,
+    required bool showFollowButton,
+  }) {
     final user = state.user!;
     final colors = context.colors;
     final typography = context.typography;
@@ -205,7 +219,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   ],
                 ),
 
-                if (!isMyProfile) ...[
+                if (showFollowButton) ...[
                   const SizedBox(height: 20),
                   // Follow button
                   _FollowButton(
