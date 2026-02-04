@@ -49,10 +49,6 @@ class AppRouter extends RootStackRouter {
       path: '/create-record',
     ),
     AutoRoute(
-      page: UserSearchRoute.page,
-      path: '/search',
-    ),
-    AutoRoute(
       page: UserProfileRoute.page,
       path: '/user/:userId',
     ),
@@ -64,6 +60,7 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: TimerRoute.page,
           path: 'timer',
+          initial: true,
         ),
         AutoRoute(
           page: FeedRoute.page,
@@ -72,6 +69,10 @@ class AppRouter extends RootStackRouter {
         AutoRoute(
           page: StatisticsRoute.page,
           path: 'statistics',
+        ),
+        AutoRoute(
+          page: UserSearchRoute.page,
+          path: 'search',
         ),
         AutoRoute(
           page: ProfileRoute.page,
