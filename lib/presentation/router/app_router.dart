@@ -12,6 +12,7 @@ import '../screens/feed/feed_screen.dart';
 import '../screens/statistics/statistics_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/record/create_record_screen.dart';
+import '../screens/notification/notification_screen.dart';
 import '../screens/user/user_search_screen.dart';
 import '../screens/user/user_profile_screen.dart';
 
@@ -51,6 +52,10 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       page: UserProfileRoute.page,
       path: '/user/:userId',
+    ),
+    AutoRoute(
+      page: NotificationRoute.page,
+      path: '/notifications',
     ),
     // Shell route for bottom navigation
     AutoRoute(
@@ -101,6 +106,7 @@ class AppRoutes {
   static const search = '/search';
   static const profile = '/profile';
   static const createRecord = '/create-record';
+  static const notifications = '/notifications';
   static const userSearch = '/search';
   static const userProfile = '/user';
 }

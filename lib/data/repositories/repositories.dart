@@ -7,3 +7,4 @@ export 'follow_repository.dart';
 export 'reaction_repository.dart';
 export 'statistics_repository.dart';
 export 'comment_repository.dart';
+export 'notification_repository.dart';

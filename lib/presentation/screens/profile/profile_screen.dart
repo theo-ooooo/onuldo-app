@@ -24,6 +24,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ref.read(hobbyProvider.notifier).loadHobbies();
       // 내 정보 새로고침
       ref.invalidate(myInfoProvider);
+      // 알림 뱃지 갱신
+      ref.read(notificationProvider.notifier).loadUnreadCount();
     });
   }
 
@@ -259,6 +261,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final myInfoAsync = ref.watch(myInfoProvider);
     final hobbyState = ref.watch(hobbyProvider);
+    final notificationState = ref.watch(notificationProvider);
     final colors = context.colors;
     final typography = context.typography;
 
@@ -272,9 +275,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               // Header
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Text(
-                  '프로필',
-                  style: typography.largeTitle,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '프로필',
+                        style: typography.largeTitle,
+                      ),
+                    ),
+                    _NotificationIconButton(
+                      unreadCount: notificationState.unreadCount,
+                      onTap: () {
+                        ref.read(notificationProvider.notifier).loadNotifications();
+                        context.router.push(const NotificationRoute());
+                      },
+                    ),
+                  ],
                 ),
               ),
 
@@ -401,6 +417,70 @@ class _IconButton extends StatelessWidget {
           icon,
           size: 20,
           color: colors.textSecondary,
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationIconButton extends StatelessWidget {
+  final int unreadCount;
+  final VoidCallback onTap;
+
+  const _NotificationIconButton({
+    required this.unreadCount,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 44,
+        height: 44,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.notifications_none,
+                size: 20,
+                color: colors.textSecondary,
+              ),
+            ),
+            if (unreadCount > 0)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: colors.error,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: colors.background, width: 2),
+                  ),
+                  child: Text(
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
