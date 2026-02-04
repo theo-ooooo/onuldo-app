@@ -35,48 +35,21 @@ class _NotificationScreenState extends ConsumerState<NotificationScreen> {
         child: Column(
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => context.router.maybePop(),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: colors.surface,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: colors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
+            ModalPageHeader(
+              title: '알림',
+              trailing: TextButton(
+                onPressed: state.notifications.isEmpty
+                    ? null
+                    : () => ref.read(notificationProvider.notifier).markAllAsRead(),
+                child: Text(
+                  '전체 읽음',
+                  style: typography.footnote.copyWith(
+                    color: state.notifications.isEmpty
+                        ? colors.textTertiary
+                        : colors.textPrimary,
+                    fontWeight: FontWeight.w600,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '알림',
-                      style: typography.title2,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: state.notifications.isEmpty
-                        ? null
-                        : () => ref.read(notificationProvider.notifier).markAllAsRead(),
-                    child: Text(
-                      '전체 읽음',
-                      style: typography.footnote.copyWith(
-                        color: state.notifications.isEmpty
-                            ? colors.textTertiary
-                            : colors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             const SizedBox(height: 12),

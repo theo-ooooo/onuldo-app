@@ -106,36 +106,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Column(
       children: [
         // Header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () => context.router.maybePop(),
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.arrow_back,
-                    color: colors.textSecondary,
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  user.nickname,
-                  style: typography.title3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
+        ModalPageHeader(
+          title: user.nickname,
         ),
 
         const SizedBox(height: 24),

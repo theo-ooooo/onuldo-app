@@ -41,12 +41,8 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Text(
-                '통계',
-                style: typography.largeTitle,
-              ),
+            const PageHeader(
+              title: '통계',
             ),
 
             const SizedBox(height: 20),

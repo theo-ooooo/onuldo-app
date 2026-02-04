@@ -47,12 +47,8 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
         child: Column(
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Text(
-                '검색',
-                style: typography.largeTitle,
-              ),
+            const PageHeader(
+              title: '검색',
             ),
 
             const SizedBox(height: 16),

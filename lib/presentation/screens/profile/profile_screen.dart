@@ -273,24 +273,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '프로필',
-                        style: typography.largeTitle,
-                      ),
-                    ),
-                    _NotificationIconButton(
-                      unreadCount: notificationState.unreadCount,
-                      onTap: () {
-                        ref.read(notificationProvider.notifier).loadNotifications();
-                        context.router.push(const NotificationRoute());
-                      },
-                    ),
-                  ],
+              PageHeader(
+                title: '프로필',
+                trailing: _NotificationIconButton(
+                  unreadCount: notificationState.unreadCount,
+                  onTap: () {
+                    ref.read(notificationProvider.notifier).loadNotifications();
+                    context.router.push(const NotificationRoute());
+                  },
                 ),
               ),
 

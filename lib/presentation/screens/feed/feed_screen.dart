@@ -65,22 +65,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: [
-                  Text(
-                    '피드',
-                    style: typography.largeTitle,
-                  ),
-                  const Spacer(),
-                  _SortButton(
-                    sortType: feedState.sortType,
-                    onChanged: (sort) {
-                      ref.read(feedProvider.notifier).changeSortType(sort);
-                    },
-                  ),
-                ],
+            PageHeader(
+              title: '피드',
+              trailing: _SortButton(
+                sortType: feedState.sortType,
+                onChanged: (sort) {
+                  ref.read(feedProvider.notifier).changeSortType(sort);
+                },
               ),
             ),
 
