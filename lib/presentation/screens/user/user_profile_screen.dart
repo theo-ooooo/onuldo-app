@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/duration_formatter.dart';
 import '../../../data/models/models.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/providers.dart';
@@ -386,7 +387,9 @@ class _UserFeedList extends StatelessWidget {
                   Icon(Icons.timer_outlined, size: 16, color: colors.textTertiary),
                   const SizedBox(width: 6),
                   Text(
-                    '${(item.durationSeconds / 60).round()}분',
+                    DurationFormatter.formatHumanReadable(
+                      Duration(seconds: item.durationSeconds),
+                    ),
                     style: typography.footnote.copyWith(
                       color: colors.textSecondary,
                       fontWeight: FontWeight.w600,
