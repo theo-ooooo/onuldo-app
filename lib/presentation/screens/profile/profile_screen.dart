@@ -1,9 +1,12 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/utils/duration_formatter.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../../data/models/models.dart';
+import '../../../data/repositories/user_repository.dart';
 import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/widgets.dart';
@@ -26,6 +29,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ref.invalidate(myInfoProvider);
       // 알림 뱃지 갱신
       ref.read(notificationProvider.notifier).loadUnreadCount();
+      // 통계 정보 로드
+      ref.read(statisticsProvider.notifier).loadStatistics();
     });
   }
 
@@ -257,11 +262,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final myInfoAsync = ref.watch(myInfoProvider);
     final hobbyState = ref.watch(hobbyProvider);
     final notificationState = ref.watch(notificationProvider);
+    final statisticsState = ref.watch(statisticsProvider);
     final colors = context.colors;
     final typography = context.typography;
 
@@ -284,33 +291,61 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // Profile section
-              AppListSection(
-                children: [
-                  myInfoAsync.when(
-                    data: (user) => _ProfileTile(
-                      userId: user.userId,
-                      nickname: user.nickname,
-                      email: user.email,
-                      profileImageUrl: user.profileImageUrl,
-                      bio: user.bio,
-                    ),
-                    loading: () => const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: LoadingIndicator(size: 24)),
-                    ),
-                    error: (error, stack) => _ProfileTile(
-                      userId: null,
-                      nickname: '사용자',
-                      email: '',
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: myInfoAsync.when(
+                  data: (user) => GestureDetector(
+                    onTap: () {
+                      context.router.push(UserProfileRoute(userId: user.userId));
+                    },
+                    child: _ProfileCard(
+                      user: user,
+                      onEdit: () {
+                        context.router.push(const EditProfileRoute());
+                      },
                     ),
                   ),
-                ],
+                  loading: () => Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Center(child: LoadingIndicator(size: 24)),
+                  ),
+                  error: (error, stack) => Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      '프로필을 불러올 수 없습니다',
+                      style: typography.body.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
+
+              // Statistics section
+              if (statisticsState.monthly != null || statisticsState.streak != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _StatisticsCard(
+                    monthly: statisticsState.monthly,
+                    streak: statisticsState.streak,
+                  ),
+                ),
+
+              if (statisticsState.monthly != null || statisticsState.streak != null)
+                const SizedBox(height: 24),
 
               // Hobbies section
               Padding(
@@ -363,6 +398,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               AppListSection(
                 children: [
                   _ThemeSettingTile(),
+                  AppIconListTile(
+                    icon: Icons.lock_outline,
+                    iconColor: colors.textPrimary,
+                    iconBackgroundColor: colors.surfaceSecondary,
+                    title: '비밀번호 변경',
+                    onTap: () {
+                      context.router.push(const ChangePasswordRoute());
+                    },
+                  ),
                   AppIconListTile(
                     icon: Icons.logout,
                     iconColor: colors.error,
@@ -479,19 +523,13 @@ class _NotificationIconButton extends StatelessWidget {
   }
 }
 
-class _ProfileTile extends StatelessWidget {
-  final int? userId;
-  final String nickname;
-  final String email;
-  final String? profileImageUrl;
-  final String? bio;
+class _ProfileCard extends StatelessWidget {
+  final UserResponse user;
+  final VoidCallback onEdit;
 
-  const _ProfileTile({
-    this.userId,
-    required this.nickname,
-    required this.email,
-    this.profileImageUrl,
-    this.bio,
+  const _ProfileCard({
+    required this.user,
+    required this.onEdit,
   });
 
   @override
@@ -499,76 +537,326 @@ class _ProfileTile extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typography;
 
-    return GestureDetector(
-      onTap: userId != null
-          ? () {
-              context.router.push(UserProfileRoute(userId: userId!));
-            }
-          : null,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
         children: [
-          // Avatar
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: colors.surfaceSecondary,
-              borderRadius: BorderRadius.circular(30),
-              image: profileImageUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(profileImageUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: profileImageUrl == null
-                ? Center(
-                    child: Text(
-                      nickname.isNotEmpty ? nickname[0].toUpperCase() : 'U',
-                      style: typography.title1.copyWith(
-                        fontWeight: FontWeight.w400,
-                        color: colors.textSecondary,
+          Row(
+            children: [
+              // Avatar
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: colors.surfaceSecondary,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: user.profileImageUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: CachedNetworkImage(
+                          imageUrl: user.profileImageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: Text(
+                              user.nickname.isNotEmpty
+                                  ? user.nickname[0].toUpperCase()
+                                  : 'U',
+                              style: typography.title1.copyWith(
+                                fontWeight: FontWeight.w300,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Text(
+                              user.nickname.isNotEmpty
+                                  ? user.nickname[0].toUpperCase()
+                                  : 'U',
+                              style: typography.title1.copyWith(
+                                fontWeight: FontWeight.w300,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          user.nickname.isNotEmpty
+                              ? user.nickname[0].toUpperCase()
+                              : 'U',
+                          style: typography.title1.copyWith(
+                            fontWeight: FontWeight.w300,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.nickname,
+                      style: typography.title2.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nickname,
-                  style: typography.title3,
+                    if (user.email.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        user.email,
+                        style: typography.subhead.copyWith(
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-                if (email.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    email,
-                    style: typography.subhead.copyWith(
-                      color: colors.textSecondary,
-                    ),
+              ),
+              GestureDetector(
+                onTap: onEdit,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceSecondary,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ],
-                if (bio != null && bio!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    bio!,
-                    style: typography.footnote.copyWith(
-                      color: colors.textTertiary,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  child: Icon(
+                    Icons.edit_outlined,
+                    size: 20,
+                    color: colors.textSecondary,
                   ),
-                ],
-              ],
+                ),
+              ),
+            ],
+          ),
+          if (user.bio != null && user.bio!.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                user.bio!,
+                style: typography.body.copyWith(
+                  color: colors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
             ),
+          ],
+          const SizedBox(height: 16),
+          // Stats
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _StatItem(
+                label: '팔로워',
+                value: user.followerCount.toString(),
+              ),
+              Container(
+                width: 1,
+                height: 32,
+                color: colors.separatorOpaque,
+              ),
+              _StatItem(
+                label: '팔로잉',
+                value: user.followingCount.toString(),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _StatItem({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Column(
+      children: [
+        Text(
+          value,
+          style: typography.title3.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: typography.footnote.copyWith(
+            color: colors.textTertiary,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatisticsCard extends StatelessWidget {
+  final MonthlyStatisticsResponse? monthly;
+  final StreakResponse? streak;
+
+  const _StatisticsCard({
+    this.monthly,
+    this.streak,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '이번 달 통계',
+            style: typography.title3.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.timer_outlined,
+                  iconColor: colors.timerRunning,
+                  label: '총 시간',
+                  value: monthly != null
+                      ? DurationFormatter.formatHumanReadable(
+                          Duration(seconds: monthly!.totalDurationSeconds),
+                        )
+                      : '0분',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _StatCard(
+                  icon: Icons.check_circle_outline,
+                  iconColor: colors.textSecondary,
+                  label: '기록 수',
+                  value: monthly?.recordCount.toString() ?? '0',
+                ),
+              ),
+            ],
+          ),
+          if (streak != null && streak!.currentStreak > 0) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colors.surfaceSecondary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.local_fire_department,
+                    color: colors.timerRunning,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${streak!.currentStreak}일 연속',
+                          style: typography.title3.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '최장 ${streak!.longestStreak}일',
+                          style: typography.footnote.copyWith(
+                            color: colors.textTertiary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+
+  const _StatCard({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typography;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surfaceSecondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            color: iconColor,
+            size: 20,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: typography.title3.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: typography.footnote.copyWith(
+              color: colors.textTertiary,
+            ),
+          ),
+        ],
       ),
     );
   }

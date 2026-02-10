@@ -102,6 +102,12 @@ class ApiException implements Exception {
 
   @override
   String toString() => 'ApiException: $message (statusCode: $statusCode)';
+
+  /// Exception에서 사용자에게 보여줄 에러 메시지 추출
+  static String extractMessage(Object e) {
+    if (e is ApiException) return e.message;
+    return '알 수 없는 오류가 발생했습니다.';
+  }
 }
 
 /// 공용 API 클라이언트
@@ -248,6 +254,31 @@ class ApiClient {
           message: apiResponse.message ?? '요청에 실패했습니다.',
         );
       }
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// PATCH 요청
+  Future<T> patch<T>(
+    String path, {
+    dynamic data,
+    required T Function(dynamic json) fromJson,
+  }) async {
+    try {
+      final response = await _dio.patch(path, data: data);
+      final apiResponse = ApiResponse<T>.fromJson(
+        response.data,
+        fromJson,
+      );
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return apiResponse.data!;
+      }
+
+      throw ApiException(
+        message: apiResponse.message ?? '요청에 실패했습니다.',
+      );
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

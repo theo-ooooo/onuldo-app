@@ -17,6 +17,8 @@ import '../screens/user/user_search_screen.dart';
 import '../screens/user/user_profile_screen.dart';
 import '../screens/feed/feed_detail_screen.dart';
 import '../screens/feed/photo_viewer_screen.dart';
+import '../screens/profile/edit_profile_screen.dart';
+import '../screens/profile/change_password_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -66,6 +68,14 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       page: NotificationRoute.page,
       path: '/notifications',
+    ),
+    AutoRoute(
+      page: EditProfileRoute.page,
+      path: '/profile/edit',
+    ),
+    AutoRoute(
+      page: ChangePasswordRoute.page,
+      path: '/profile/change-password',
     ),
     // Shell route for bottom navigation
     AutoRoute(

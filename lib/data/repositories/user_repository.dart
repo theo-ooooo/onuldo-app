@@ -44,4 +44,34 @@ class UserRepository {
       data: {'fcmToken': fcmToken},
     );
   }
+
+  /// 내 프로필 정보 업데이트
+  Future<void> updateMyProfile({
+    String? nickname,
+    String? bio,
+    String? profileImageUrl,
+  }) async {
+    await _apiClient.putVoid(
+      '/api/users/me/profile',
+      data: {
+        if (nickname != null) 'nickname': nickname,
+        if (bio != null) 'bio': bio,
+        if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
+      },
+    );
+  }
+
+  /// 비밀번호 변경
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    await _apiClient.putVoid(
+      '/api/users/me/password',
+      data: {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      },
+    );
+  }
 }

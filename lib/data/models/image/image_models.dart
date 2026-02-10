@@ -43,3 +43,13 @@ class ImageUploadResponse with _$ImageUploadResponse {
   factory ImageUploadResponse.fromJson(Map<String, dynamic> json) =>
       _$ImageUploadResponseFromJson(json);
 }
+
+@freezed
+class ProfileImageUploadResponse with _$ProfileImageUploadResponse {
+  const factory ProfileImageUploadResponse({
+    required String profileImageUrl,
+  }) = _ProfileImageUploadResponse;
+
+  factory ProfileImageUploadResponse.fromJson(Map<String, dynamic> json) =>
+      _$ProfileImageUploadResponseFromJson(json);
+}

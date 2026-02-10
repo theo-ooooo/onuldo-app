@@ -85,4 +85,6 @@ class ApiConstants {
   static String userFollow(int userId) => '/api/users/$userId/follow';
   static String userFollowers(int userId) => '/api/users/$userId/followers';
   static String userFollowing(int userId) => '/api/users/$userId/following';
+  static const String profileImagePresignedUrl = '/api/users/me/profile-image/presigned-url';
+  static const String profileImageConfirm = '/api/users/me/profile-image/confirm';
 }

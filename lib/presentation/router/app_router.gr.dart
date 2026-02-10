@@ -11,6 +11,22 @@
 part of 'app_router.dart';
 
 /// generated route for
+/// [ChangePasswordScreen]
+class ChangePasswordRoute extends PageRouteInfo<void> {
+  const ChangePasswordRoute({List<PageRouteInfo>? children})
+    : super(ChangePasswordRoute.name, initialChildren: children);
+
+  static const String name = 'ChangePasswordRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const ChangePasswordScreen();
+    },
+  );
+}
+
+/// generated route for
 /// [CreateRecordScreen]
 class CreateRecordRoute extends PageRouteInfo<CreateRecordRouteArgs> {
   CreateRecordRoute({
@@ -74,6 +90,22 @@ class CreateRecordRouteArgs {
   String toString() {
     return 'CreateRecordRouteArgs{key: $key, timerId: $timerId, hobbyId: $hobbyId, hobbyName: $hobbyName, durationSeconds: $durationSeconds}';
   }
+}
+
+/// generated route for
+/// [EditProfileScreen]
+class EditProfileRoute extends PageRouteInfo<void> {
+  const EditProfileRoute({List<PageRouteInfo>? children})
+    : super(EditProfileRoute.name, initialChildren: children);
+
+  static const String name = 'EditProfileRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const EditProfileScreen();
+    },
+  );
 }
 
 /// generated route for

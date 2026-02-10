@@ -110,4 +110,66 @@ class ImageRepository {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// 프로필 이미지 Presigned URL 발급
+  Future<PresignedUploadUrlResponse> getProfileImagePresignedUrl(
+    String fileName,
+    String? contentType,
+  ) async {
+    try {
+      final queryParams = <String, dynamic>{
+        'fileName': fileName,
+      };
+      if (contentType != null) {
+        queryParams['contentType'] = contentType;
+      }
+
+      final response = await _dio.get(
+        ApiConstants.profileImagePresignedUrl,
+        queryParameters: queryParams,
+      );
+
+      final apiResponse = ApiResponse<PresignedUploadUrlResponse>.fromJson(
+        response.data,
+        (json) => PresignedUploadUrlResponse.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return apiResponse.data!;
+      }
+
+      throw ApiException(
+        message: apiResponse.message ?? 'Presigned URL 발급에 실패했습니다.',
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// 프로필 이미지 업로드 확인
+  Future<ProfileImageUploadResponse> confirmProfileImageUpload(
+    ConfirmImageUploadRequest request,
+  ) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.profileImageConfirm,
+        data: request.toJson(),
+      );
+
+      final apiResponse = ApiResponse<ProfileImageUploadResponse>.fromJson(
+        response.data,
+        (json) => ProfileImageUploadResponse.fromJson(json as Map<String, dynamic>),
+      );
+
+      if (apiResponse.success && apiResponse.data != null) {
+        return apiResponse.data!;
+      }
+
+      throw ApiException(
+        message: apiResponse.message ?? '프로필 이미지 업로드 확인에 실패했습니다.',
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }
