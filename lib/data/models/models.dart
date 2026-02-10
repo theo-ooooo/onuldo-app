@@ -31,5 +31,8 @@ export 'statistics/statistics_models.dart';
 // Comment
 export 'comment/comment_models.dart';
 
+// Image
+export 'image/image_models.dart';
+
 // Notification
 export 'notification/notification_models.dart';

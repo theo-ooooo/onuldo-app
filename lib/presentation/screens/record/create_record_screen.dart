@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart' hide Visibility;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../shared/theme/app_theme.dart';
 import '../../../core/utils/duration_formatter.dart';
@@ -28,12 +31,24 @@ class CreateRecordScreen extends ConsumerStatefulWidget {
 
 class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
   final _memoController = TextEditingController();
+  final _imagePicker = ImagePicker();
   Visibility _visibility = Visibility.public;
 
   @override
   void dispose() {
     _memoController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    final images = await _imagePicker.pickMultiImage(
+      imageQuality: 80,
+      maxWidth: 1920,
+      maxHeight: 1920,
+    );
+    if (images.isNotEmpty) {
+      ref.read(recordProvider.notifier).addImages(images);
+    }
   }
 
   Future<void> _saveRecord() async {
@@ -49,17 +64,24 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
       return;
     }
 
-    final record = await ref.read(recordProvider.notifier).createRecord(
-          CreateRecordRequest(
-            timerId: widget.timerId!,
-            hobbyId: widget.hobbyId!,
-            durationSeconds: widget.durationSeconds!,
-            memo: _memoController.text.trim().isEmpty
-                ? null
-                : _memoController.text.trim(),
-            visibility: _visibility,
-          ),
-        );
+    final request = CreateRecordRequest(
+      timerId: widget.timerId!,
+      hobbyId: widget.hobbyId!,
+      durationSeconds: widget.durationSeconds!,
+      memo: _memoController.text.trim().isEmpty
+          ? null
+          : _memoController.text.trim(),
+      visibility: _visibility,
+    );
+
+    final hasImages = ref.read(recordProvider).selectedImages.isNotEmpty;
+    final RecordResponse? record;
+
+    if (hasImages) {
+      record = await ref.read(recordProvider.notifier).createRecordWithImages(request);
+    } else {
+      record = await ref.read(recordProvider.notifier).createRecord(request);
+    }
 
     if (record != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -152,6 +174,33 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                 ],
               ),
             ),
+
+            // Upload progress
+            if (recordState.isUploading)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '이미지 업로드 중... ${(recordState.uploadProgress * 100).toInt()}%',
+                      style: typography.caption1.copyWith(
+                        color: colors.textTertiary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: recordState.uploadProgress,
+                        backgroundColor: colors.surface,
+                        valueColor: AlwaysStoppedAnimation(colors.timerRunning),
+                        minHeight: 4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             const SizedBox(height: 24),
 
@@ -259,6 +308,102 @@ class _CreateRecordScreenState extends ConsumerState<CreateRecordScreen> {
                             color: colors.textTertiary,
                           ),
                         ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Photo section
+                    Text(
+                      '사진',
+                      style: typography.headline.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 100,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          // Add button
+                          GestureDetector(
+                            onTap: _pickImages,
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: colors.surface,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: colors.separatorOpaque,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_photo_alternate_outlined,
+                                    color: colors.textTertiary,
+                                    size: 28,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${recordState.selectedImages.length}/5',
+                                    style: typography.caption1.copyWith(
+                                      color: colors.textTertiary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // Image thumbnails
+                          ...recordState.selectedImages.asMap().entries.map(
+                            (entry) {
+                              final index = entry.key;
+                              final image = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        File(image.path),
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () => ref
+                                            .read(recordProvider.notifier)
+                                            .removeImage(index),
+                                        child: Container(
+                                          width: 24,
+                                          height: 24,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.6),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
 

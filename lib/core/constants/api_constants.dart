@@ -46,6 +46,8 @@ class ApiConstants {
 
   // Record endpoints
   static const String records = '/api/records';
+  static String recordPresignedUrl(int recordId) => '/api/records/$recordId/images/presigned-url';
+  static String recordImageConfirm(int recordId) => '/api/records/$recordId/images/confirm';
 
   // Feed endpoints
   static const String feed = '/api/feed';

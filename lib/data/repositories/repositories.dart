@@ -8,3 +8,4 @@ export 'reaction_repository.dart';
 export 'statistics_repository.dart';
 export 'comment_repository.dart';
 export 'notification_repository.dart';
+export 'image_repository.dart';
