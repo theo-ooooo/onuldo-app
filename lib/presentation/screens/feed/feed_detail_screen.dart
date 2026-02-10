@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -130,16 +131,35 @@ class _FeedDetailScreenState extends ConsumerState<FeedDetailScreen> {
                               decoration: BoxDecoration(
                                 color: colors.surfaceSecondary,
                                 shape: BoxShape.circle,
-                                image: item.userProfileImageUrl != null
-                                    ? DecorationImage(
-                                        image: NetworkImage(
-                                            item.userProfileImageUrl!),
-                                        fit: BoxFit.cover,
-                                      )
-                                    : null,
                               ),
-                              child: item.userProfileImageUrl == null
-                                  ? Center(
+                              child: item.userProfileImageUrl != null
+                                  ? ClipOval(
+                                      child: CachedNetworkImage(
+                                        imageUrl: item.userProfileImageUrl!,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Center(
+                                          child: Text(
+                                            item.userNickname[0].toUpperCase(),
+                                            style: typography.headline.copyWith(
+                                              color: colors.textSecondary,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                        errorWidget: (context, url, error) => Center(
+                                          child: Text(
+                                            item.userNickname[0].toUpperCase(),
+                                            style: typography.headline.copyWith(
+                                              color: colors.textSecondary,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : Center(
                                       child: Text(
                                         item.userNickname[0].toUpperCase(),
                                         style: typography.headline.copyWith(
@@ -147,8 +167,7 @@ class _FeedDetailScreenState extends ConsumerState<FeedDetailScreen> {
                                           fontSize: 18,
                                         ),
                                       ),
-                                    )
-                                  : null,
+                                    ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -512,15 +531,33 @@ class _CommentItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: colors.surfaceSecondary,
                   shape: BoxShape.circle,
-                  image: comment.userProfileImageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(comment.userProfileImageUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                 ),
-                child: comment.userProfileImageUrl == null
-                    ? Center(
+                child: comment.userProfileImageUrl != null
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: comment.userProfileImageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: Text(
+                              comment.userNickname[0].toUpperCase(),
+                              style: (isReply
+                                      ? typography.caption1
+                                      : typography.subhead)
+                                  .copyWith(color: colors.textSecondary),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Text(
+                              comment.userNickname[0].toUpperCase(),
+                              style: (isReply
+                                      ? typography.caption1
+                                      : typography.subhead)
+                                  .copyWith(color: colors.textSecondary),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
                         child: Text(
                           comment.userNickname[0].toUpperCase(),
                           style: (isReply
@@ -528,8 +565,7 @@ class _CommentItem extends StatelessWidget {
                                   : typography.subhead)
                               .copyWith(color: colors.textSecondary),
                         ),
-                      )
-                    : null,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -618,6 +654,8 @@ class _ImageSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    
     if (images.length == 1) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -627,9 +665,22 @@ class _ImageSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image.network(
-                images.first.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: images.first.imageUrl,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: colors.surfaceSecondary,
+                  child: const Center(
+                    child: LoadingIndicator(size: 24),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: colors.surfaceSecondary,
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: colors.textTertiary,
+                  ),
+                ),
               ),
             ),
           ),
@@ -649,11 +700,28 @@ class _ImageSection extends StatelessWidget {
             onTap: () => onImageTap(index),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                images[index].imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: images[index].imageUrl,
                 width: 240,
                 height: 240,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  width: 240,
+                  height: 240,
+                  color: colors.surfaceSecondary,
+                  child: const Center(
+                    child: LoadingIndicator(size: 24),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: 240,
+                  height: 240,
+                  color: colors.surfaceSecondary,
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    color: colors.textTertiary,
+                  ),
+                ),
               ),
             ),
           );

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -341,23 +342,38 @@ class _CommentItem extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: colors.surfaceSecondary,
                   borderRadius: BorderRadius.circular(isReply ? 14 : 18),
-                  image: comment.userProfileImageUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(comment.userProfileImageUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
                 ),
-                child: comment.userProfileImageUrl == null
-                    ? Center(
+                child: comment.userProfileImageUrl != null
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: comment.userProfileImageUrl!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Center(
+                            child: Text(
+                              comment.userNickname[0].toUpperCase(),
+                              style: (isReply ? typography.caption1 : typography.subhead).copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Text(
+                              comment.userNickname[0].toUpperCase(),
+                              style: (isReply ? typography.caption1 : typography.subhead).copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : Center(
                         child: Text(
                           comment.userNickname[0].toUpperCase(),
                           style: (isReply ? typography.caption1 : typography.subhead).copyWith(
                             color: colors.textSecondary,
                           ),
                         ),
-                      )
-                    : null,
+                      ),
               ),
               const SizedBox(width: 12),
               Expanded(

@@ -59,6 +59,9 @@ dependencies:
   # Image Picker
   image_picker: ^1.1.2
 
+  # Image Caching
+  cached_network_image: ^3.4.1
+
   # Storage
   shared_preferences: ^2.2.2
 

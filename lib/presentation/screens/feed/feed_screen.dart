@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -359,15 +360,35 @@ class _FeedItem extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: colors.surfaceSecondary,
                       shape: BoxShape.circle,
-                      image: item.userProfileImageUrl != null
-                          ? DecorationImage(
-                              image: NetworkImage(item.userProfileImageUrl!),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
                     ),
-                    child: item.userProfileImageUrl == null
-                        ? Center(
+                    child: item.userProfileImageUrl != null
+                        ? ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: item.userProfileImageUrl!,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Center(
+                                child: Text(
+                                  item.userNickname[0].toUpperCase(),
+                                  style: typography.headline.copyWith(
+                                    color: colors.textSecondary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Center(
+                                child: Text(
+                                  item.userNickname[0].toUpperCase(),
+                                  style: typography.headline.copyWith(
+                                    color: colors.textSecondary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : Center(
                             child: Text(
                               item.userNickname[0].toUpperCase(),
                               style: typography.headline.copyWith(
@@ -376,8 +397,7 @@ class _FeedItem extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          )
-                        : null,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -478,9 +498,22 @@ class _FeedItem extends StatelessWidget {
                         onTap: () => onImageTap?.call(0),
                         child: AspectRatio(
                           aspectRatio: 16 / 9,
-                          child: Image.network(
-                            item.images.first.imageUrl,
+                          child: CachedNetworkImage(
+                            imageUrl: item.images.first.imageUrl,
                             fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: colors.surfaceSecondary,
+                              child: const Center(
+                                child: LoadingIndicator(size: 24),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: colors.surfaceSecondary,
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: colors.textTertiary,
+                              ),
+                            ),
                           ),
                         ),
                       )
@@ -496,11 +529,28 @@ class _FeedItem extends StatelessWidget {
                               onTap: () => onImageTap?.call(index),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  image.imageUrl,
+                                child: CachedNetworkImage(
+                                  imageUrl: image.imageUrl,
                                   width: 200,
                                   height: 200,
                                   fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    width: 200,
+                                    height: 200,
+                                    color: colors.surfaceSecondary,
+                                    child: const Center(
+                                      child: LoadingIndicator(size: 24),
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) => Container(
+                                    width: 200,
+                                    height: 200,
+                                    color: colors.surfaceSecondary,
+                                    child: Icon(
+                                      Icons.broken_image_outlined,
+                                      color: colors.textTertiary,
+                                    ),
+                                  ),
                                 ),
                               ),
                             );

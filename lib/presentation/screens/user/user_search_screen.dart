@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -232,15 +233,36 @@ class _UserTile extends StatelessWidget {
               decoration: BoxDecoration(
                 color: colors.surfaceSecondary,
                 borderRadius: BorderRadius.circular(12),
-                image: user.profileImageUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(user.profileImageUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: user.profileImageUrl == null
-                  ? Center(
+              child: user.profileImageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedNetworkImage(
+                        imageUrl: user.profileImageUrl!,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(
+                          child: Text(
+                            user.nickname[0].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Center(
+                          child: Text(
+                            user.nickname[0].toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
                       child: Text(
                         user.nickname[0].toUpperCase(),
                         style: TextStyle(
@@ -249,8 +271,7 @@ class _UserTile extends StatelessWidget {
                           color: colors.textSecondary,
                         ),
                       ),
-                    )
-                  : null,
+                    ),
             ),
             const SizedBox(width: 12),
             Expanded(
