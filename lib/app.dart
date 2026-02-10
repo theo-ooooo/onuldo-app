@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,9 @@ class OnuldoApp extends ConsumerStatefulWidget {
 }
 
 class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserver {
+  String? _previousRouteName;
+  bool _permissionRequested = false;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +37,39 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
       final router = ref.read(routerProvider);
       router.replaceAll([const LoginRoute()]);
     };
+
+    // iOS에서 푸시 알림 권한 요청
+    if (Platform.isIOS) {
+      _requestNotificationPermission();
+    }
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    if (_permissionRequested) return;
+    _permissionRequested = true;
+
+    try {
+      debugPrint('[FCM] Requesting notification permission...');
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+
+      debugPrint('[FCM] Permission status: ${settings.authorizationStatus}');
+      if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional) {
+        debugPrint('[FCM] Notification permission granted');
+      } else {
+        debugPrint('[FCM] Notification permission denied');
+      }
+    } catch (e) {
+      debugPrint('[FCM] Error requesting permission: $e');
+    }
   }
 
   @override
@@ -51,14 +89,35 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
   Future<void> _updateFcmToken() async {
     try {
       debugPrint('[FCM] Getting token...');
+      
+      // iOS에서는 권한이 필요합니다
+      if (Platform.isIOS && !_permissionRequested) {
+        await _requestNotificationPermission();
+      }
+      
+      // Firebase Messaging이 자동으로 APNS 토큰을 처리합니다
+      // getToken()을 호출하면 자동으로 APNS 토큰이 준비될 때까지 기다립니다
       final fcmToken = await FirebaseMessaging.instance.getToken();
       debugPrint('[FCM] Token: $fcmToken');
+      
       if (fcmToken != null) {
         await ref.read(userRepositoryProvider).updateFcmToken(fcmToken);
         debugPrint('[FCM] Token updated successfully');
+      } else {
+        debugPrint('[FCM] FCM token is null');
       }
     } catch (e) {
       debugPrint('[FCM] Error: $e');
+      // iOS에서 APNS 토큰이 아직 준비되지 않은 경우, 잠시 후 재시도
+      if (Platform.isIOS && e.toString().contains('apns-token-not-set')) {
+        debugPrint('[FCM] APNS token not ready yet, will retry later...');
+        // 나중에 재시도 (예: 5초 후)
+        Future.delayed(const Duration(seconds: 5), () {
+          if (mounted) {
+            _updateFcmToken();
+          }
+        });
+      }
     }
   }
 
@@ -75,6 +134,17 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
         _updateFcmToken();
       }
     });
+
+    // 페이지 이동 감지 (테스트용)
+    final currentRouteName = router.current.name;
+    if (_previousRouteName != null && _previousRouteName != currentRouteName) {
+      debugPrint('[FCM] Route changed: $_previousRouteName -> $currentRouteName');
+      // 페이지 이동 시 FCM 토큰 업데이트 (테스트용)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _updateFcmToken();
+      });
+    }
+    _previousRouteName = currentRouteName;
 
     return MaterialApp.router(
       title: '오늘도',
