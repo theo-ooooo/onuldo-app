@@ -21,6 +21,19 @@ enum SortType {
 }
 
 @freezed
+class FeedImageResponse with _$FeedImageResponse {
+  const factory FeedImageResponse({
+    required String imageId,
+    required String imageUrl,
+    int? width,
+    int? height,
+  }) = _FeedImageResponse;
+
+  factory FeedImageResponse.fromJson(Map<String, dynamic> json) =>
+      _$FeedImageResponseFromJson(json);
+}
+
+@freezed
 class FeedItemResponse with _$FeedItemResponse {
   const factory FeedItemResponse({
     required int recordId,
@@ -34,6 +47,7 @@ class FeedItemResponse with _$FeedItemResponse {
     required Visibility visibility,
     required String activityDate,
     @Default([]) List<String> tags,
+    @Default([]) List<FeedImageResponse> images,
     /// 이모지별 리액션 수 (예: {"HEART": 5, "FIRE": 3})
     @Default({}) Map<String, int> reactionCounts,
     @Default(0) int commentCount,

@@ -77,6 +77,43 @@ class CreateRecordRouteArgs {
 }
 
 /// generated route for
+/// [FeedDetailScreen]
+class FeedDetailRoute extends PageRouteInfo<FeedDetailRouteArgs> {
+  FeedDetailRoute({
+    Key? key,
+    required int recordId,
+    List<PageRouteInfo>? children,
+  }) : super(
+         FeedDetailRoute.name,
+         args: FeedDetailRouteArgs(key: key, recordId: recordId),
+         initialChildren: children,
+       );
+
+  static const String name = 'FeedDetailRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<FeedDetailRouteArgs>();
+      return FeedDetailScreen(key: args.key, recordId: args.recordId);
+    },
+  );
+}
+
+class FeedDetailRouteArgs {
+  const FeedDetailRouteArgs({this.key, required this.recordId});
+
+  final Key? key;
+
+  final int recordId;
+
+  @override
+  String toString() {
+    return 'FeedDetailRouteArgs{key: $key, recordId: $recordId}';
+  }
+}
+
+/// generated route for
 /// [FeedScreen]
 class FeedRoute extends PageRouteInfo<void> {
   const FeedRoute({List<PageRouteInfo>? children})
@@ -138,6 +175,58 @@ class NotificationRoute extends PageRouteInfo<void> {
       return const NotificationScreen();
     },
   );
+}
+
+/// generated route for
+/// [PhotoViewerScreen]
+class PhotoViewerRoute extends PageRouteInfo<PhotoViewerRouteArgs> {
+  PhotoViewerRoute({
+    Key? key,
+    required List<String> imageUrls,
+    int initialIndex = 0,
+    List<PageRouteInfo>? children,
+  }) : super(
+         PhotoViewerRoute.name,
+         args: PhotoViewerRouteArgs(
+           key: key,
+           imageUrls: imageUrls,
+           initialIndex: initialIndex,
+         ),
+         initialChildren: children,
+       );
+
+  static const String name = 'PhotoViewerRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<PhotoViewerRouteArgs>();
+      return PhotoViewerScreen(
+        key: args.key,
+        imageUrls: args.imageUrls,
+        initialIndex: args.initialIndex,
+      );
+    },
+  );
+}
+
+class PhotoViewerRouteArgs {
+  const PhotoViewerRouteArgs({
+    this.key,
+    required this.imageUrls,
+    this.initialIndex = 0,
+  });
+
+  final Key? key;
+
+  final List<String> imageUrls;
+
+  final int initialIndex;
+
+  @override
+  String toString() {
+    return 'PhotoViewerRouteArgs{key: $key, imageUrls: $imageUrls, initialIndex: $initialIndex}';
+  }
 }
 
 /// generated route for

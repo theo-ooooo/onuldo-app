@@ -15,6 +15,8 @@ import '../screens/record/create_record_screen.dart';
 import '../screens/notification/notification_screen.dart';
 import '../screens/user/user_search_screen.dart';
 import '../screens/user/user_profile_screen.dart';
+import '../screens/feed/feed_detail_screen.dart';
+import '../screens/feed/photo_viewer_screen.dart';
 
 part 'app_router.gr.dart';
 
@@ -52,6 +54,14 @@ class AppRouter extends RootStackRouter {
     AutoRoute(
       page: UserProfileRoute.page,
       path: '/user/:userId',
+    ),
+    AutoRoute(
+      page: FeedDetailRoute.page,
+      path: '/feed/:recordId',
+    ),
+    AutoRoute(
+      page: PhotoViewerRoute.page,
+      path: '/photo-viewer',
     ),
     AutoRoute(
       page: NotificationRoute.page,

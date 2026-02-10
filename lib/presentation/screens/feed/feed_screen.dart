@@ -158,6 +158,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             onCommentTap: () {
               showCommentBottomSheet(context, item.recordId);
             },
+            onTap: () {
+              context.router.push(FeedDetailRoute(recordId: item.recordId));
+            },
+            onImageTap: (imageIndex) {
+              context.router.push(PhotoViewerRoute(
+                imageUrls: item.images.map((e) => e.imageUrl).toList(),
+                initialIndex: imageIndex,
+              ));
+            },
           );
         },
       ),
@@ -301,12 +310,16 @@ class _FeedItem extends StatelessWidget {
   final ValueChanged<EmojiType> onReaction;
   final VoidCallback? onUserTap;
   final VoidCallback? onCommentTap;
+  final VoidCallback? onTap;
+  final ValueChanged<int>? onImageTap;
 
   const _FeedItem({
     required this.item,
     required this.onReaction,
     this.onUserTap,
     this.onCommentTap,
+    this.onTap,
+    this.onImageTap,
   });
 
   @override
@@ -314,7 +327,10 @@ class _FeedItem extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typography;
 
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -452,6 +468,48 @@ class _FeedItem extends StatelessWidget {
               ),
             ],
 
+            // Images
+            if (item.images.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: item.images.length == 1
+                    ? GestureDetector(
+                        onTap: () => onImageTap?.call(0),
+                        child: AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: Image.network(
+                            item.images.first.imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    : SizedBox(
+                        height: 200,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: item.images.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          itemBuilder: (context, index) {
+                            final image = item.images[index];
+                            return GestureDetector(
+                              onTap: () => onImageTap?.call(index),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  image.imageUrl,
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+              ),
+            ],
+
             const SizedBox(height: 14),
 
             // Reactions and Comments
@@ -526,6 +584,7 @@ class _FeedItem extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 
