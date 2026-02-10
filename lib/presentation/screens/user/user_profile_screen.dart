@@ -6,6 +6,7 @@ import '../../../core/utils/duration_formatter.dart';
 import '../../../data/models/models.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../providers/providers.dart';
+import '../../router/app_router.dart';
 import '../../widgets/widgets.dart';
 
 @RoutePage()
@@ -315,7 +316,9 @@ class _UserFeedList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final item = items[index];
-        return Container(
+        return GestureDetector(
+          onTap: () => context.router.push(FeedDetailRoute(recordId: item.recordId)),
+          child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: colors.surface,
@@ -407,6 +410,7 @@ class _UserFeedList extends StatelessWidget {
               ),
             ],
           ),
+        ),
         );
       },
     );
