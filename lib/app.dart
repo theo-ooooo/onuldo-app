@@ -28,14 +28,13 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // 토큰 만료(401 + 재발급 실패) 시 전역 강제 로그아웃 + 로그인 페이지 이동
+    // 토큰 만료(401 + 재발급 실패) 시 전역 강제 로그아웃
+    // 실제 로그인 페이지 이동은 ref.listen에서 처리
     AuthInterceptor.onTokenExpired = () async {
+      debugPrint('[App] onTokenExpired called, logging out...');
       // auth 상태를 unauthenticated로 변경
       await ref.read(authProvider.notifier).logout();
-
-      // 로그인 페이지로 이동 (전체 스택 교체)
-      final router = ref.read(routerProvider);
-      router.replaceAll([const LoginRoute()]);
+      debugPrint('[App] Logout completed');
     };
 
     // iOS에서 푸시 알림 권한 요청
@@ -126,12 +125,25 @@ class _OnuldoAppState extends ConsumerState<OnuldoApp> with WidgetsBindingObserv
     final router = ref.watch(routerProvider);
     final themeState = ref.watch(themeProvider);
 
-    // auth 상태 변경 감지 (로그인 시 FCM 토큰 업데이트만 처리)
+    // auth 상태 변경 감지
     ref.listen(authProvider, (prev, next) {
       // 로그인 성공 시 FCM 토큰 업데이트
       if (prev?.status != AuthStatus.authenticated &&
           next.status == AuthStatus.authenticated) {
         _updateFcmToken();
+      }
+      
+      // 로그아웃 또는 인증 실패 시 로그인 페이지로 이동
+      if (next.status == AuthStatus.unauthenticated &&
+          prev?.status != AuthStatus.unauthenticated) {
+        debugPrint('[App] Auth status changed to unauthenticated, navigating to login...');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final router = ref.read(routerProvider);
+          if (router.current.name != 'LoginRoute') {
+            router.replaceAll([const LoginRoute()]);
+            debugPrint('[App] Navigated to login page');
+          }
+        });
       }
     });
 
